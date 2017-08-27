@@ -115,9 +115,25 @@ namespace Webrestful.Models
         public string tRevenue { get; set; }
         public string AvgRate { get; set; }
     }
+    public class RoomForecastOverall
+    {
+        public string RoomType { get; set; }
+        public string RoomTypeId { get; set; }
+        public string TotalRoom { get; set; }
+    }
+    public class RoomForecastStat
+    {
+        public string Arrival { get; set; }
+        public string Departure { get; set; }
+        public string ooo { get; set; }
+    }
+    public class RoomForecastEach
+    {
+        public string TotalRoom { get; set; }
+        public string TotalPrice { get; set; }
+    }
     public class SetRoomTypeForecast
     {
-        public string EachRoom { get; set; }
         public string BeachBung { get; set; }
         public string GardenBung { get; set; }
         public string SupSea { get; set; }
@@ -125,6 +141,7 @@ namespace Webrestful.Models
         public string SupGarden { get; set; }
         public string SupBung { get; set; }
         public string OOO { get; set; }
+        public string EachRoom { get; set; }
     }
     public class Source
     {
@@ -137,74 +154,31 @@ namespace Webrestful.Models
         public string month { get; set; }
         public string sum { get; set; }
     }
-    public class WalkIn
+    public class Nation
     {
-        public string month { get; set; }
+        public string id { get; set; }
+        public string name { get; set; }
+        public string roomNight { get; set; }
+    }
+    public class NationObject
+    {
+        public string id { get; set; }
         public string sum { get; set; }
     }
-    public class Reservation
+    public class TransID
     {
-        public string month { get; set; }
-        public string sum { get; set; }
+        public string id { get; set; }
     }
-    public class AgencyReservation
+
+    public class AgencyName
     {
-        public string month { get; set; }
-        public string sum { get; set; }
+        public string name { get; set; }
+        public string id { get; set; }
+
     }
-    public class History
+    public class AgencyObject
     {
-        public string month { get; set; }
-        public string sum { get; set; }
-    }
-    public class Government
-    {
-        public string month { get; set; }
-        public string sum { get; set; }
-    }
-    public class WebBooking
-    {
-        public string month { get; set; }
-        public string sum { get; set; }
-    }
-    public class Association
-    {
-        public string month { get; set; }
-        public string sum { get; set; }
-    }
-    public class Complimentary
-    {
-        public string month { get; set; }
-        public string sum { get; set; }
-    }
-    public class Corporation
-    {
-        public string month { get; set; }
-        public string sum { get; set; }
-    }
-    public class DayUse
-    {
-        public string month { get; set; }
-        public string sum { get; set; }
-    }
-    public class EMB
-    {
-        public string month { get; set; }
-        public string sum { get; set; }
-    }
-    public class HouseUse
-    {
-        public string month { get; set; }
-        public string sum { get; set; }
-    }
-    public class GuideTaxi
-    {
-        public string month { get; set; }
-        public string sum { get; set; }
-    }
-    public class VIP
-    {
-        public string month { get; set; }
-        public string sum { get; set; }
+        public string total { get; set; }
+        public string date { get; set; }
     }
 }

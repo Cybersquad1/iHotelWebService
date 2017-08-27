@@ -138,7 +138,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Views\Business_source\" />
     <Folder Include="Views\RoomForecast\" />
   </ItemGroup>
   <ItemGroup>
@@ -174,14 +173,18 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Controllers\AgencyReportController.cs" />
     <Compile Include="Controllers\Arrival_DepartureController.cs" />
     <Compile Include="Controllers\Business_sourceController.cs" />
+    <Compile Include="Controllers\CompareController.cs" />
     <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\DateController.cs" />
     <Compile Include="Controllers\HistoryandForcastController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\HotelAuthenController.cs" />
     <Compile Include="Controllers\Revenue_folioController.cs" />
+    <Compile Include="Controllers\Revenue_NationalityController.cs" />
+    <Compile Include="Controllers\RoomAvailableForecastController.cs" />
     <Compile Include="Controllers\RoomForecastController.cs" />
     <Compile Include="Controllers\RsvnagencyController.cs" />
     <Compile Include="Controllers\StaticroomController.cs" />
@@ -191,6 +194,7 @@
     </Compile>
     <Compile Include="Models\Arrival_Departure.cs" />
     <Compile Include="Models\Business_source.cs" />
+    <Compile Include="Models\Compare.cs" />
     <Compile Include="Models\Dashboard.cs" />
     <Compile Include="Models\Date.cs" />
     <Compile Include="Models\DBHelper.cs" />
@@ -198,10 +202,13 @@
     <Compile Include="Models\HotelAuthenAPI.cs" />
     <Compile Include="Models\Hotelmodels.cs" />
     <Compile Include="Models\Revenue_folio.cs" />
+    <Compile Include="Models\Revenue_Nationality.cs" />
+    <Compile Include="Models\RoomAvailableForecast.cs" />
     <Compile Include="Models\RoomForecast.cs" />
     <Compile Include="Models\Rsvnagency.cs" />
     <Compile Include="Models\Staticroom.cs" />
     <Compile Include="Models\Summary_Folio.cs" />
+    <Compile Include="Models\AgencyReport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -238,7 +245,9 @@
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>

@@ -8,10 +8,10 @@ using Webrestful.Models;
 
 namespace Webrestful.Controllers
 {
-    public class RoomForecastController : ApiController
+    public class AgencyReportController : ApiController
     {
         [HttpGet]
-        public HttpResponseMessage GetForecast(string szHotelDB, string szIPServer, string szDate, string szDeviceCode)
+        public HttpResponseMessage GetAgencyName(string szHotelDB, string szDeviceCode)
         {
             var result = new Response();
             var conn = DBHelper.ConnectDatabase(szHotelDB);
@@ -23,7 +23,7 @@ namespace Webrestful.Controllers
             }
 
             string szErrMsg = "";
-            var xListTransInfo = RoomForecast.GetForecast(conn, Convert.ToDateTime(szDate), ref szErrMsg);
+            var xListTransInfo = AgencyReport.GetAgencyName(conn, ref szErrMsg);
             if (xListTransInfo == null)
             {
                 result.status = 1;
@@ -38,9 +38,8 @@ namespace Webrestful.Controllers
             DBHelper.CloseConnection(conn);
             return Request.CreateResponse(HttpStatusCode.OK, result);
         }
-
         [HttpGet]
-        public HttpResponseMessage GetRoomType(string szHotelDB, string szIPServer, string szDate, string szDeviceCode)
+        public HttpResponseMessage GetAgencyNight(string szHotelDB, string szDate, string szDate2, string mode, string id, string szDeviceCode)
         {
             var result = new Response();
             var conn = DBHelper.ConnectDatabase(szHotelDB);
@@ -52,7 +51,7 @@ namespace Webrestful.Controllers
             }
 
             string szErrMsg = "";
-            var xListTransInfo = RoomForecast.GetRoomType(conn, Convert.ToDateTime(szDate), ref szErrMsg);
+            var xListTransInfo = AgencyReport.GetAgencyNight(conn, szDate, szDate2, mode, id, ref szErrMsg);
             if (xListTransInfo == null)
             {
                 result.status = 1;
@@ -67,10 +66,35 @@ namespace Webrestful.Controllers
             DBHelper.CloseConnection(conn);
             return Request.CreateResponse(HttpStatusCode.OK, result);
         }
-
-        // DELETE: api/Arrival_Departure/5
-        public void Delete(int id)
+       
+        [HttpGet]
+        public HttpResponseMessage GetAgencyCharge(string szHotelDB, string szDate, string szDate2, string mode, string id, string szDeviceCode)
         {
+            var result = new Response();
+            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            if (conn == null)
+            {
+                result.status = -1;
+                result.dataResult = "Fail Connect Database";
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, result);
+            }
+
+            string szErrMsg = "";
+            var xListTransInfo = AgencyReport.GetAgencyCharge(conn, szDate, szDate2, mode, id, ref szErrMsg);
+            if (xListTransInfo == null)
+            {
+                result.status = 1;
+                result.dataResult = szErrMsg;
+            }
+            else
+            {
+                result.status = 0;
+                result.dataResult = xListTransInfo;
+            }
+
+            DBHelper.CloseConnection(conn);
+            return Request.CreateResponse(HttpStatusCode.OK, result);
         }
+       
     }
 }

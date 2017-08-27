@@ -144,9 +144,7 @@ namespace Webrestful.Models
                     string OOOQuery = "SELECT Count(*) as TotalOOO FROM RoomMaintenance A JOIN RoomNo B ON A.RoomNoID=B.RoomNoID WHERE A.ChangeRoomStatusTo=5 AND A.MaintenanceStatusID<90 AND A.MaintenanceStatusID=1 AND MaintenanceFinishDate>='" + startdate + "';";
                     DataTable dtO = DBHelper.QueryListData(conn, OOOQuery);
                     xTrans.OOO = dtO.Rows[0]["TotalOOO"].ToString();
-                    ///////////ADD Each Room///////
                     xTrans.EachRoom = eachRoom[i].ToString();
-
                     xAryTransCheckIn.Add(xTrans);
                     dtHotelDate = dtHotelDate.AddDays(1);
                 }
