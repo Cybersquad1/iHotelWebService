@@ -181,4 +181,28 @@ namespace Webrestful.Models
         public string total { get; set; }
         public string date { get; set; }
     }
+    //public class AgencyCompare
+    //{
+    //    public string name { get; set; }
+    //    public string id { get; set; }
+    //    public string total { get; set; }
+    //    public string date { get; set; }
+    //}
+    public class TotalPrice
+    {
+        public string date { get; set; }
+        public string price { get; set; }
+    }
+
+    public class TotalPrices
+    {
+        public List<TotalPrice> Price { get; set; }
+    }
+
+    public class AgencyCompare
+    {
+        public string name { get; set; }
+        public string id { get; set; }
+        public TotalPrices total { get; set; }
+    }
 }
