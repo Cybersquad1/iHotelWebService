@@ -1,0 +1,16 @@
+﻿<Properties StartupConfiguration="{922C89B5-9B3D-48E2-95C3-91401F1AFF51}|">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Webrestful/Models/DBHelper.cs">
+    <Files>
+      <File FileName="Webrestful/Models/Dashboard.cs" Line="55" Column="30" />
+      <File FileName="Webrestful/Models/Hotelmodels.cs" Line="23" Column="26" />
+      <File FileName="Webrestful/Models/DBHelper.cs" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.ItemProperties.Webrestful PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+</Properties>
