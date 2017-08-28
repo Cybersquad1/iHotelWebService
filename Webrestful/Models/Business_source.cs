@@ -19,7 +19,7 @@ namespace Webrestful.Models
                 string BusinessType = "SELECT GuestChannelID, GuestChannelName FROM GuestChannel ORDER BY Ordering;";
                 DataTable dtFIT = DBHelper.QueryListData(conn, BusinessType);
 
-                for (int i = 0; i < 15; i++)
+                for (int i = 0; i < dtFIT.Rows.Count; i++)
                 {
                     var xTrans = new Source();
                     xTrans.BusinessSource = dtFIT.Rows[i]["GuestChannelName"].ToString();
