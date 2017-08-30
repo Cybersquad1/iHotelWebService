@@ -11,10 +11,10 @@ namespace Webrestful.Controllers
     public class Revenue_folioController : ApiController
     {
         [HttpGet]
-        public HttpResponseMessage Getrevenuefoliotoday(string szHotelDB, string szDate1, string szDeviceCode)
+        public HttpResponseMessage Getrevenuefoliotoday(string szHotelDB, string szServer,string szDate1, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -40,10 +40,10 @@ namespace Webrestful.Controllers
         }
 
         [HttpGet]
-        public HttpResponseMessage Getrevenuefoliomonth(string szHotelDB, string szDate1, string szDate2, string szDeviceCode)
+        public HttpResponseMessage Getrevenuefoliomonth(string szHotelDB, string szServer,string szDate1, string szDate2, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;

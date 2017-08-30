@@ -11,10 +11,10 @@ namespace Webrestful.Controllers
     public class Arrival_DepartureController : ApiController
     {
         [HttpGet]
-        public HttpResponseMessage Arrival(string szHotelDB, string szDate, string szDeviceCode)
+        public HttpResponseMessage Arrival(string szHotelDB, string szServer,string szDate, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -40,10 +40,10 @@ namespace Webrestful.Controllers
         }
 
         [HttpGet]
-        public HttpResponseMessage Departure(string szHotelDB, string szDate, string szDeviceCode)
+        public HttpResponseMessage Departure(string szHotelDB, string szServer,string szDate, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;

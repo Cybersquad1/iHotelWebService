@@ -9,24 +9,24 @@ namespace Webrestful.Models
 {
     public class HotelAuthenAPI
     {
-        public static string CheckHotelLicense(string szHotelLicense, string szHotelPassword, ref int iHotelID)
-        {
-            try
-            {
-                var conn = DBHelper.ConnectDatabase("iHotelMaster");
-                string szFmt = "SELECT * FROM HotelMaster WHERE LicenseValue='{0}' AND LicensePassword='{1}'";
-                string szQuery = string.Format(szFmt, szHotelLicense.Trim().Replace("'", "''"), szHotelPassword.Trim().Replace("'", "''"));
-                DataTable dt = DBHelper.QueryListData(conn, szQuery);
-                iHotelID = (dt.Rows.Count == 0) ? 0 : int.Parse(dt.Rows[0]["HotelID"].ToString());
-                conn.Close();
-                return (dt.Rows.Count == 0) ? "" : dt.Rows[0]["DatabaseName"].ToString();
-            }
-            catch (Exception)
-            {
-                iHotelID = 0;
-                return null;
-            }
-        }
+        //public static string CheckHotelLicense(string szHotelLicense, string szHotelPassword, ref int iHotelID)
+        //{
+        //    try
+        //    {
+        //        var conn = DBHelper.ConnectDatabase("iHotelMaster");
+        //        string szFmt = "SELECT * FROM HotelMaster WHERE LicenseValue='{0}' AND LicensePassword='{1}'";
+        //        string szQuery = string.Format(szFmt, szHotelLicense.Trim().Replace("'", "''"), szHotelPassword.Trim().Replace("'", "''"));
+        //        DataTable dt = DBHelper.QueryListData(conn, szQuery);
+        //        iHotelID = (dt.Rows.Count == 0) ? 0 : int.Parse(dt.Rows[0]["HotelID"].ToString());
+        //        conn.Close();
+        //        return (dt.Rows.Count == 0) ? "" : dt.Rows[0]["DatabaseName"].ToString();
+        //    }
+        //    catch (Exception)
+        //    {
+        //        iHotelID = 0;
+        //        return null;
+        //    }
+        //}
 
         public static int VerifyUserNamePassword(MySqlConnection conn, string szUserLogin, string szPassword, ref string szUserFullName)
         {

@@ -11,10 +11,10 @@ namespace Webrestful.Controllers
     public class Revenue_NationalityController : ApiController
     {
         [HttpGet]
-        public HttpResponseMessage GetNationality(string szHotelDB, string szDate, string szDate2, string szDeviceCode)
+        public HttpResponseMessage GetNationality(string szHotelDB, string szServer,string szDate, string szDate2, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -39,10 +39,10 @@ namespace Webrestful.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpGet]
-        public HttpResponseMessage GetTransID(string szHotelDB, string szDate, string szDate2, string szDeviceCode)
+        public HttpResponseMessage GetTransID(string szHotelDB, string szServer,string szDate, string szDate2, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -67,10 +67,10 @@ namespace Webrestful.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpGet]
-       public HttpResponseMessage GetRR(string szHotelDB, string szDate, string szDate2, string szDeviceCode)
+       public HttpResponseMessage GetRR(string szHotelDB, string szServer, string szDate, string szDate2, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -95,10 +95,10 @@ namespace Webrestful.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpGet]
-        public HttpResponseMessage GetOther(string szHotelDB, string szDate, string szDate2, string szDeviceCode)
+        public HttpResponseMessage GetOther(string szHotelDB, string szServer, string szDate, string szDate2, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -123,10 +123,10 @@ namespace Webrestful.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpGet]
-        public HttpResponseMessage GetABF(string szHotelDB, string szDate, string szDate2, string szDeviceCode)
+        public HttpResponseMessage GetABF(string szHotelDB,string szServer, string szDate, string szDate2, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;

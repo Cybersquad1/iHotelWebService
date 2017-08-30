@@ -11,10 +11,10 @@ namespace Webrestful.Controllers
     public class CompareController : ApiController
     {
         [HttpGet]
-        public HttpResponseMessage Getrevenuefoliomonth(string szHotelDB, string server,string szDate1, string szDate2, string szDeviceCode)
+        public HttpResponseMessage Getrevenuefoliomonth(string szHotelDB, string szServer, string szDate1, string szDate2, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB, server);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -39,10 +39,10 @@ namespace Webrestful.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpGet]
-        public HttpResponseMessage GetBusiness(string szHotelDB, string server, string szDate1, string szDeviceCode)
+        public HttpResponseMessage GetBusiness(string szHotelDB, string szServer, string szDate1, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB, server);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -67,10 +67,10 @@ namespace Webrestful.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpGet]
-        public HttpResponseMessage GetAgency(string szHotelDB, string server, string mode, string szDate, string szDate2, string szDeviceCode)
+        public HttpResponseMessage GetAgency(string szHotelDB, string szServer, string mode, string szDate, string szDate2, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB, server);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;

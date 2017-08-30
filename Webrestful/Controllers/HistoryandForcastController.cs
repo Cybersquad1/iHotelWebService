@@ -12,10 +12,10 @@ namespace Webrestful.Controllers
     {
       
         [HttpGet]
-        public HttpResponseMessage GetHistory(string szHotelDB, string szDate1, string szDate2, int vat, string szDeviceCode)
+        public HttpResponseMessage GetHistory(string szHotelDB, string szServer,string szDate1, string szDate2, int vat, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -42,10 +42,10 @@ namespace Webrestful.Controllers
 
 
         [HttpGet]
-        public HttpResponseMessage GetForcast(string szHotelDB, string szDate1, string szDate2, int vat, string szDeviceCode)
+        public HttpResponseMessage GetForcast(string szHotelDB, string szServer,string szDate1, string szDate2, int vat, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;

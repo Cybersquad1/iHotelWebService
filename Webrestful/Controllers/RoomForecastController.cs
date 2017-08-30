@@ -14,7 +14,7 @@ namespace Webrestful.Controllers
         public HttpResponseMessage GetForecast(string szHotelDB, string szIPServer, string szDate, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szIPServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -43,7 +43,7 @@ namespace Webrestful.Controllers
         public HttpResponseMessage GetRoomType(string szHotelDB, string szIPServer, string szDate, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szIPServer);
             if (conn == null)
             {
                 result.status = -1;

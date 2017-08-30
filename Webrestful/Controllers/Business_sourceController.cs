@@ -5,16 +5,17 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using Webrestful.Models;
-
+using System.Diagnostics;
 namespace Webrestful.Controllers
 {
     public class Business_sourceController : ApiController
     {
         [HttpGet]
-        public HttpResponseMessage GetSource(string szHotelDB, string szDeviceCode)
+        public HttpResponseMessage GetSource(string szHotelDB,string szServer, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            Debug.WriteLine(szHotelDB + " " + szServer);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -39,10 +40,10 @@ namespace Webrestful.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpGet]
-        public HttpResponseMessage GetEachSource(string szHotelDB, string id,string szDate, string szDeviceCode)
+        public HttpResponseMessage GetEachSource(string szHotelDB, string szServer,string id,string szDate, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -68,10 +69,10 @@ namespace Webrestful.Controllers
 
         }
         [HttpGet]
-        public HttpResponseMessage GetEachCharge(string szHotelDB, string id, string szDate, string szDeviceCode)
+        public HttpResponseMessage GetEachCharge(string szHotelDB, string szServer,string id, string szDate, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;

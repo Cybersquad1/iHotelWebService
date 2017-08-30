@@ -11,10 +11,10 @@ namespace Webrestful.Controllers
     public class DateController : ApiController
     {
         [HttpGet]
-        public HttpResponseMessage Getdate(string szHotelDB)
+        public HttpResponseMessage Getdate(string szHotelDB, string szServer)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;

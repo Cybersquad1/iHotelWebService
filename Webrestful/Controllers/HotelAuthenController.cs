@@ -10,28 +10,28 @@ namespace Webrestful.Controllers
 {
     public class HotelAuthenController : ApiController
     {
-        [HttpGet]
-        public HttpResponseMessage CheckAuthenLicense(string szHotelLicense, string szHotelPassword, string szDeviceCode)
-        {
-            var result = new Response();
-            int iHotelID = 0;
-            string szHotelDB = HotelAuthenAPI.CheckHotelLicense(szHotelLicense, szHotelPassword, ref iHotelID);
-            if (szHotelDB == null)
-            {
-                //--- Fail, no do any thing in mobile until connect database.
-                result.status = -1;
-                result.dataResult = "Fail Connect Database";
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, result);
-            }
-            else
-            {
-                result.status = 0;
-                result.dataResult = szHotelDB;    // This parameter will be first parameter of all methods.
-                result.dataExtra = iHotelID;
-            }
+        //[HttpGet]
+        //public HttpResponseMessage CheckAuthenLicense(string szHotelLicense, string szHotelPassword, string szDeviceCode)
+        //{
+        //    var result = new Response();
+        //    int iHotelID = 0;
+        //    string szHotelDB = HotelAuthenAPI.CheckHotelLicense(szHotelLicense, szHotelPassword, ref iHotelID);
+        //    if (szHotelDB == null)
+        //    {
+        //        //--- Fail, no do any thing in mobile until connect database.
+        //        result.status = -1;
+        //        result.dataResult = "Fail Connect Database";
+        //        return Request.CreateResponse(HttpStatusCode.InternalServerError, result);
+        //    }
+        //    else
+        //    {
+        //        result.status = 0;
+        //        result.dataResult = szHotelDB;    // This parameter will be first parameter of all methods.
+        //        result.dataExtra = iHotelID;
+        //    }
 
-            return Request.CreateResponse(HttpStatusCode.OK, result);
-        }
+        //    return Request.CreateResponse(HttpStatusCode.OK, result);
+        //}
 
         [HttpGet]
         public HttpResponseMessage VerifyUserNamePassword(string szHotelDB, string szIPServer, string szUserLogin, string szPassword, string szDeviceCode)
@@ -65,10 +65,10 @@ namespace Webrestful.Controllers
         }
 
         [HttpGet]
-        public HttpResponseMessage GetCurrentHotelDate(string szHotelDB, string szDeviceCode)
+        public HttpResponseMessage GetCurrentHotelDate(string szHotelDB, string szServer,string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -87,10 +87,10 @@ namespace Webrestful.Controllers
 
         // DELETE: api/HotelAuthen/5
         [HttpGet]
-        public HttpResponseMessage Getdate(string szHotelDB)
+        public HttpResponseMessage Getdate(string szHotelDB,string szServer)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB,szServer);
             if (conn == null)
             {
                 result.status = -1;

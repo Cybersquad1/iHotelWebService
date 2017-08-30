@@ -11,10 +11,10 @@ namespace Webrestful.Controllers
     public class RsvnagencyController : ApiController
     {
         [HttpGet]
-        public HttpResponseMessage Getrsvnagency(string szHotelDB, string szDate1, string szDate2, string szDate3, string szDeviceCode)
+        public HttpResponseMessage Getrsvnagency(string szHotelDB, string szServer,string szDate1, string szDate2, string szDate3, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;

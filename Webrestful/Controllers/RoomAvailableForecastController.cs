@@ -13,7 +13,7 @@ namespace Webrestful.Controllers
         public HttpResponseMessage GetForecast(string szHotelDB, string szIPServer, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szIPServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -41,7 +41,7 @@ namespace Webrestful.Controllers
         public HttpResponseMessage GetStat(string szHotelDB, string szIPServer, string date,string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szIPServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -69,7 +69,7 @@ namespace Webrestful.Controllers
         public HttpResponseMessage GetEach(string szHotelDB, string szIPServer, string date, string id,string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szIPServer);
             if (conn == null)
             {
                 result.status = -1;

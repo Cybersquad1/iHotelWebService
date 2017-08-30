@@ -11,10 +11,10 @@ namespace Webrestful.Controllers
     public class DashboardController : ApiController
     {
         [HttpGet]
-        public HttpResponseMessage Getdashboard(string szHotelDB, string szDate1, string szDeviceCode)
+        public HttpResponseMessage Getdashboard(string szHotelDB, string szServer, string szDate1, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -42,10 +42,10 @@ namespace Webrestful.Controllers
 
 
         [HttpGet]
-        public HttpResponseMessage Getdashboardabf(string szHotelDB, string szDate1, string szDeviceCode)
+        public HttpResponseMessage Getdashboardabf(string szHotelDB, string szServer,string szDate1, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;

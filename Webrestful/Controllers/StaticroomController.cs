@@ -11,10 +11,10 @@ namespace Webrestful.Controllers
     public class StaticroomController : ApiController
     {
         [HttpGet]
-        public HttpResponseMessage Getstaticrooms (string szHotelDB, string szDate1, string szDeviceCode)
+        public HttpResponseMessage Getstaticrooms (string szHotelDB, string szServer,string szDate1, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -40,10 +40,10 @@ namespace Webrestful.Controllers
         }
 
         [HttpGet]
-        public HttpResponseMessage Getcurrentrooms(string szHotelDB, string szDate1, string szDeviceCode)
+        public HttpResponseMessage Getcurrentrooms(string szHotelDB, string szServer,string szDate1, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -69,10 +69,10 @@ namespace Webrestful.Controllers
         }
 
         [HttpGet]
-        public HttpResponseMessage Getinhousestatus(string szHotelDB, string szDate1, string szDeviceCode)
+        public HttpResponseMessage Getinhousestatus(string szHotelDB, string szServer,string szDate1, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -98,10 +98,10 @@ namespace Webrestful.Controllers
         }
 
         [HttpGet]
-        public HttpResponseMessage GetCurRoomBusiness(string szHotelDB, string szDate1, string szDeviceCode)
+        public HttpResponseMessage GetCurRoomBusiness(string szHotelDB, string szServer, string szDate1, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -127,10 +127,10 @@ namespace Webrestful.Controllers
         }
 
         [HttpGet]
-        public HttpResponseMessage GetCurRevenue(string szHotelDB, string szDate1, string szDeviceCode)
+        public HttpResponseMessage GetCurRevenue(string szHotelDB,string szServer, string szDate1, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -156,10 +156,10 @@ namespace Webrestful.Controllers
         }
 
         [HttpGet]
-        public HttpResponseMessage GetCurPayment(string szHotelDB, string szDate1, string szDeviceCode)
+        public HttpResponseMessage GetCurPayment(string szHotelDB,string szServer, string szDate1, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;

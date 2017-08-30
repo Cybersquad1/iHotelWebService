@@ -11,10 +11,10 @@ namespace Webrestful.Controllers
     public class AgencyReportController : ApiController
     {
         [HttpGet]
-        public HttpResponseMessage GetAgencyName(string szHotelDB, string szDeviceCode)
+        public HttpResponseMessage GetAgencyName(string szHotelDB, string szServer,string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -39,10 +39,10 @@ namespace Webrestful.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpGet]
-        public HttpResponseMessage GetAgencyNight(string szHotelDB, string szDate, string szDate2, string mode, string id, string szDeviceCode)
+        public HttpResponseMessage GetAgencyNight(string szHotelDB, string szServer,string szDate, string szDate2, string mode, string id, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;
@@ -68,10 +68,10 @@ namespace Webrestful.Controllers
         }
        
         [HttpGet]
-        public HttpResponseMessage GetAgencyCharge(string szHotelDB, string szDate, string szDate2, string mode, string id, string szDeviceCode)
+        public HttpResponseMessage GetAgencyCharge(string szHotelDB, string szServer,string szDate, string szDate2, string mode, string id, string szDeviceCode)
         {
             var result = new Response();
-            var conn = DBHelper.ConnectDatabase(szHotelDB);
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
             if (conn == null)
             {
                 result.status = -1;

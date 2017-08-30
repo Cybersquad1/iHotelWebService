@@ -10,10 +10,10 @@ namespace Webrestful.Models
 {
     public class DBHelper
     {
-        public static MySqlConnection ConnectDatabase(string szHotelName)
-        {
-            return ConnectDatabase(szHotelName, "master", "ihotel");
-        }
+        //public static MySqlConnection ConnectDatabase(string szHotelName)
+        //{
+        //    return ConnectDatabase(szHotelName, "master", "ihotel");
+        //}
         public static MySqlConnection ConnectDatabase(string szDbName, string szIPServer)
         {
             string szConnString = "database={0}; server={1}; user id={2}; password={3}; pooling=true; Port=3307; Max Pool Size=200;Connect Timeout=200";
@@ -33,41 +33,43 @@ namespace Webrestful.Models
         //{
         //    return ConnectDatabase(szDbName, szIPServer, "master", "ihotel");
         //}
-        public static MySqlConnection ConnectDatabase(string szDbName, string szUserName, string szPassword)
-        {
-            string szConnString = "database={0}; server={1}; user id={2}; password={3}; pooling=false; Port=3307";
-            MySqlConnection conn = null;
-            try
-            {
-                string szDBServer = ConfigurationManager.AppSettings["DBServer"];
-                conn = new MySqlConnection(string.Format(szConnString, szDbName, szDBServer, szUserName, szPassword));
-                conn.Open();
-                return conn;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
+        //public static MySqlConnection ConnectDatabase(string szDbName, string szUserName, string szPassword)
+        //{
+        //    string szConnString = "database={0}; server={1}; user id={2}; password={3}; pooling=false; Port=3307";
+        //    MySqlConnection conn = null;
+        //    try
+        //    {
+        //        string szDBServer = ConfigurationManager.AppSettings["DBServer"];
+        //        conn = new MySqlConnection(string.Format(szConnString, szDbName, szDBServer, szUserName, szPassword));
+        //        conn.Open();
+        //        return conn;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return null;
+        //    }
+        //}
 
-        public static MySqlConnection ConnectDatabase(string szDbName, string szIPServer, string szUserName, string szPassword)
+        //public static MySqlConnection ConnectDatabase(string szDbName, string szIPServer, string szUserName, string szPassword)
+        //{
+        //    string szConnString = "database={0}; server={1}; user id={2}; password={3}; pooling=true; Port=3307; Max Pool Size=200;Connect Timeout=200";
+        //    MySqlConnection conn = null;
+        //    try
+        //    {
+        //        conn = new MySqlConnection(string.Format(szConnString, szDbName, szIPServer, szUserName, szPassword));
+        //        conn.Open();
+        //        return conn;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return null;
+        //    }
+        //}
+        public static MySqlConnection ConnectDatabaseWebBooking(string szHotelName, string szServer,string szWebBookingLicense)
         {
-            string szConnString = "database={0}; server={1}; user id={2}; password={3}; pooling=true; Port=3307; Max Pool Size=200;Connect Timeout=200";
-            MySqlConnection conn = null;
-            try
-            {
-                conn = new MySqlConnection(string.Format(szConnString, szDbName, szIPServer, szUserName, szPassword));
-                conn.Open();
-                return conn;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-        public static MySqlConnection ConnectDatabaseWebBooking(string szHotelName, string szWebBookingLicense)
-        {
-            MySqlConnection conn = ConnectDatabase(szHotelName, "master", "ihotel");
+            //MySqlConnection conn = ConnectDatabase(szHotelName, "master", "ihotel");
+            MySqlConnection conn = ConnectDatabase(szHotelName, szServer);
+
             return conn;
         }
 
