@@ -11,7 +11,7 @@ namespace Webrestful.Controllers
     public class CompareController : ApiController
     {
         [HttpGet]
-        public HttpResponseMessage Getrevenuefoliomonth(string szHotelDB, string szServer, string szDate1, string szDate2, string szDeviceCode)
+        public HttpResponseMessage Getrevenuefolioyear(string szHotelDB, string szServer, string szDate1, string szDate2, string szDate3,string szDeviceCode)
         {
             var result = new Response();
             var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
@@ -23,7 +23,35 @@ namespace Webrestful.Controllers
             }
 
             string szErrMsg = "";
-            var xListTransInfo = Compare.Comparefoliomonth(conn, Convert.ToDateTime(szDate1), Convert.ToDateTime(szDate2), ref szErrMsg);
+            var xListTransInfo = Compare.ComparefolioYear(conn,szDate1, szDate2,szDate3, ref szErrMsg);
+            if (xListTransInfo == null)
+            {
+                result.status = 1;
+                result.dataResult = szErrMsg;
+            }
+            else
+            {
+                result.status = 0;
+                result.dataResult = xListTransInfo;
+            }
+
+            DBHelper.CloseConnection(conn);
+            return Request.CreateResponse(HttpStatusCode.OK, result);
+        }
+        [HttpGet]
+        public HttpResponseMessage Getrevenuefoliomonth(string szHotelDB, string szServer, string szDate1, string szDate2,string szDate3, string szDate4, string szDeviceCode)
+        {
+            var result = new Response();
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
+            if (conn == null)
+            {
+                result.status = -1;
+                result.dataResult = "Fail Connect Database";
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, result);
+            }
+
+            string szErrMsg = "";
+            var xListTransInfo = Compare.ComparefolioMonth(conn, szDate1,szDate2,szDate3,szDate4, ref szErrMsg);
             if (xListTransInfo == null)
             {
                 result.status = 1;

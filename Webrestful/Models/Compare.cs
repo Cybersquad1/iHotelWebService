@@ -103,55 +103,376 @@ namespace Webrestful.Models
                 return null;
             }
         }
-        public static List<Setrevenue_folio> Comparefoliomonth(MySqlConnection conn, DateTime dtHotelDate1, DateTime dtHotelDate2, ref string szErrMsg)
+        public static List<FolioCompare> ComparefolioYear(MySqlConnection conn, string dtHotelDate1, string dtHotelDate2, string dtHotelDate3, ref string szErrMsg)
         {
             try
             {
-                var xAryTransCheckIn = new List<Setrevenue_folio>();
+                var xAryTransCheckIn = new List<FolioCompare>();
 
                 string format = "yyyy-MM-dd";
                 CultureInfo cur = new CultureInfo("en-US");
-                string startdate = dtHotelDate1.ToString(format, cur);
-                string enddate = dtHotelDate2.ToString(format, cur);
-
-                string sqlstring = "SELECT HotelItemServiceName, FolioItemID, SUM(SumTotalPrice) AS TotalPrice FROM( SELECT FolioDetailDate, FolioItemID, HotelItemServiceName, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge FROM HotelFolioDetail A JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID WHERE A.FolioStatusID<>99 AND B.ItemSign=1 AND A.FolioDetailDate>= '"+startdate+"' AND A.FolioDetailDate< '"+enddate+"' AND B.HotelItemServiceID>1000 GROUP BY A.FolioItemID UNION ALL SELECT FolioDetailDate, FolioItemID, HotelItemServiceName, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge FROM HotelFolioGroupDetail A JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID WHERE A.FolioStatusID<>99 AND B.ItemSign=1 AND A.FolioDetailDate>= '"+startdate+"' AND A.FolioDetailDate< '"+enddate+"' AND B.HotelItemServiceID>1000 GROUP BY A.FolioItemID) AS A Group by FolioItemID;";
-                string matcur = ("N");
-                decimal SRevenue = 0;
-                decimal SVat = 0;
-                decimal SService = 0;
-                decimal STotal = 0;
+                string previousDate = dtHotelDate1;
+                string presentDate = dtHotelDate2;
+                string nextDate = dtHotelDate3;
+                string[] oldID; string[] newID; string[] oldSUM; string[] newSUM; string[] MergeID; string[] MergeOldSUM; string[] MergeNewSUM;
+                string[] oldName; string[] newName; string[] MergeName;
+                int oldCount, newCount, superCount, finalCount = 0;
+                ////// Get Previous Year //////
+                string sqlstring = "SELECT HotelItemServiceName, FolioItemID, SUM(SumTotalPrice) AS TotalPrice FROM( SELECT FolioDetailDate, FolioItemID, HotelItemServiceName, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge FROM HotelFolioDetail A JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID WHERE A.FolioStatusID<>99 AND B.ItemSign=1 AND A.FolioDetailDate>= '" + previousDate + "' AND A.FolioDetailDate< '" + presentDate + "' AND B.HotelItemServiceID>1000 GROUP BY A.FolioItemID UNION ALL SELECT FolioDetailDate, FolioItemID, HotelItemServiceName, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge FROM HotelFolioGroupDetail A JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID WHERE A.FolioStatusID<>99 AND B.ItemSign=1 AND A.FolioDetailDate>= '" + previousDate + "' AND A.FolioDetailDate< '" + presentDate + "' AND B.HotelItemServiceID>1000 GROUP BY A.FolioItemID) AS A Group by FolioItemID;";
                 DataTable dt = DBHelper.QueryListData(conn, sqlstring);
+                oldID = new string[dt.Rows.Count];
+                oldSUM = new string[dt.Rows.Count];
+                oldName = new string[dt.Rows.Count];
+                oldCount = dt.Rows.Count;
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
-                    var xTrans = new Setrevenue_folio();
-                    xTrans.Item = dt.Rows[i]["HotelItemServiceName"].ToString();
-                    xTrans.Vat = dt.Rows[i]["FolioItemID"].ToString();
-                    xTrans.Total = dt.Rows[i]["TotalPrice"].ToString();
-                    //xTrans.Item = dt.Rows[i]["HotelItemServiceName"].ToString();
-                    //decimal Revenue = (dt.Rows[i]["TotalPrice"] == DBNull.Value) ? 0 : decimal.Parse(dt.Rows[i]["TotalPrice"].ToString());
-                    //SRevenue += Revenue;
-                    //xTrans.Revenue = Revenue.ToString(matcur);
-                    //decimal Vat = (dt.Rows[i]["TotalVat"] == DBNull.Value) ? 0 : decimal.Parse(dt.Rows[i]["TotalVat"].ToString());
-                    //SVat += Vat;
-                    //xTrans.Vat = Vat.ToString(matcur);
-                    //decimal Service = (dt.Rows[i]["TotalSrvCharge"] == DBNull.Value) ? 0 : decimal.Parse(dt.Rows[i]["TotalSrvCharge"].ToString());
-                    //SService += Service;
-                    //xTrans.Service = Service.ToString(matcur);
-                    //decimal Total = (dt.Rows[i]["SumTotalPrice"] == DBNull.Value) ? 0 : decimal.Parse(dt.Rows[i]["SumTotalPrice"].ToString());
-                    //STotal += Total;
-                    //xTrans.Total = Total.ToString(matcur);
-
-                    xAryTransCheckIn.Add(xTrans);
+                    oldID[i] = dt.Rows[i]["FolioItemID"].ToString();
+                    oldSUM[i] = dt.Rows[i]["TotalPrice"].ToString();
+                    oldName[i] = dt.Rows[i]["HotelItemServiceName"].ToString();
                 }
 
-                xAryTransCheckIn.Add(new Setrevenue_folio
+                ////// Get Present Year //////
+                string sqlstring2 = "SELECT HotelItemServiceName, FolioItemID, SUM(SumTotalPrice) AS TotalPrice FROM( SELECT FolioDetailDate, FolioItemID, HotelItemServiceName, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge FROM HotelFolioDetail A JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID WHERE A.FolioStatusID<>99 AND B.ItemSign=1 AND A.FolioDetailDate>= '" + presentDate + "' AND A.FolioDetailDate< '" + nextDate + "' AND B.HotelItemServiceID>1000 GROUP BY A.FolioItemID UNION ALL SELECT FolioDetailDate, FolioItemID, HotelItemServiceName, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge FROM HotelFolioGroupDetail A JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID WHERE A.FolioStatusID<>99 AND B.ItemSign=1 AND A.FolioDetailDate>= '" + presentDate + "' AND A.FolioDetailDate< '" + nextDate + "' AND B.HotelItemServiceID>1000 GROUP BY A.FolioItemID) AS A Group by FolioItemID;";
+                DataTable dt2 = DBHelper.QueryListData(conn, sqlstring2);
+                newID = new string[dt2.Rows.Count];
+                newSUM = new string[dt2.Rows.Count];
+                newName = new string[dt2.Rows.Count];
+                newCount = dt2.Rows.Count;
+                for (int i = 0; i < dt2.Rows.Count; i++)
                 {
-                    SumRevenue = SRevenue.ToString(matcur),
-                    SumTotal = STotal.ToString(matcur),
-                    SumVat = SVat.ToString(matcur),
-                    SumService = SService.ToString(matcur)
-                });
+                    newID[i] = dt2.Rows[i]["FolioItemID"].ToString();
+                    newSUM[i] = dt2.Rows[i]["TotalPrice"].ToString();
+                    newName[i] = dt2.Rows[i]["HotelItemServiceName"].ToString();
+                }
+                ////// MERGE YEARS //////
+                if (oldCount > newCount)
+                {
+                    superCount = oldCount;
+                    finalCount = superCount;
+                    MergeID = new string[oldCount + newCount];
+                    MergeName = new string[oldCount + newCount];
+                    MergeNewSUM = new string[oldCount + newCount];
+                    MergeOldSUM = new string[oldCount + newCount];
+                } if (newCount > oldCount)
+                {
+                    superCount = newCount;
+                    finalCount = superCount;
+                    MergeID = new string[oldCount + newCount];
+                    MergeName = new string[oldCount + newCount];
+                    MergeNewSUM = new string[oldCount + newCount];
+                    MergeOldSUM = new string[oldCount + newCount];
+                }
+                else
+                {
+                    superCount = newCount;
+                    finalCount = superCount;
+                    MergeID = new string[oldCount + newCount];
+                    MergeName = new string[oldCount + newCount];
+                    MergeNewSUM = new string[oldCount + newCount];
+                    MergeOldSUM = new string[oldCount + newCount];
+                }
 
+                //oldCount > NewCount
+                if (oldCount > newCount)
+                {
+                    for (int i = 0; i < superCount; i++)
+                    {
+                        for (int j = 0; j < newCount; j++)
+                        {
+                            if (oldID[i] == newID[j])
+                            {
+                                MergeID[i] = oldID[i];
+                                MergeName[i] = oldName[i];
+                                MergeOldSUM[i] = oldSUM[i];
+                                MergeNewSUM[i] = newSUM[j];
+                                break;
+                            }
+                            if (j == newCount - 1)
+                            {
+                                MergeID[i] = oldID[i];
+                                MergeName[i] = oldName[i];
+                                MergeOldSUM[i] = oldSUM[i];
+                                MergeNewSUM[i] = "0";
+                            }
+                        }
+                    }
+                }////END oldCount > NewCount
+
+                //newCount > oldCount or newCount == oldCount
+                else
+                {
+                    for (int i = 0; i < superCount; i++)
+                    {
+                        for (int j = 0; j < oldCount; j++)
+                        {
+                            if (newID[i] == oldID[j])
+                            {
+                                MergeID[i] = newID[i];
+                                MergeName[i] = newName[i];
+                                MergeOldSUM[i] = oldSUM[j];
+                                MergeNewSUM[i] = newSUM[i];
+                                break;
+                            }
+                            if (j == oldCount - 1)
+                            {
+                                MergeID[i] = newID[i];
+                                MergeName[i] = newName[i];
+                                MergeOldSUM[i] = "0";
+                                MergeNewSUM[i] = newSUM[i];
+                            }
+                        }
+                    }
+                } //// END newCount > oldCount or newCount == oldCount
+
+                //Recheck
+                if (oldCount > newCount)
+                {
+                    int offset = 0;
+                    for (int i = 0; i < newCount; i++)
+                    {
+                        for (int j = 0; j < oldCount; j++)
+                        {
+                            if (newID[i] == oldID[j])
+                            {
+                                break;
+                            }
+                            if (j == oldCount - 1)
+                            {
+                                MergeID[oldCount + offset] = newID[i];
+                                MergeName[oldCount + offset] = newName[i];
+                                MergeNewSUM[oldCount + offset] = newSUM[i];
+                                MergeOldSUM[oldCount + offset] = "0";
+                                offset++;
+                                finalCount++;
+                            }
+                        }
+                    }
+                }
+
+                //if (newCount > oldCount) and newCount == oldCount
+                else
+                {
+                    int offset = 0;
+                    for (int i = 0; i < oldCount; i++)
+                    {
+                        for (int j = 0; j < newCount; j++)
+                        {
+                            if (oldID[i] == newID[j])
+                            {
+                                break;
+                            }
+                            if (j == newCount - 1)
+                            {
+                                MergeID[newCount + offset] = oldID[i];
+                                MergeName[newCount + offset] = oldName[i];
+                                MergeNewSUM[newCount + offset] = "0";
+                                MergeOldSUM[newCount + offset] = oldSUM[i];
+                                offset++;
+                                finalCount++;
+                            }
+                        }
+                    }
+                }
+
+                for (int i = 0; i < finalCount; i++)
+                {
+                    var xTrans = new FolioCompare();
+                    xTrans.id = MergeID[i];
+                    xTrans.name = MergeName[i];
+                    xTrans.previousSum = MergeOldSUM[i];
+                    xTrans.presentSum = MergeNewSUM[i];
+                    xAryTransCheckIn.Add(xTrans);
+                }
+                return xAryTransCheckIn;
+            }
+            catch (Exception err)
+            {
+                szErrMsg = err.Message;
+                return null;
+            }
+        }
+        public static List<FolioCompare> ComparefolioMonth(MySqlConnection conn, string dtHotelDate1, string dtHotelDate2, string dtHotelDate3, string dtHotelDate4,ref string szErrMsg)
+        {
+            try
+            {
+                var xAryTransCheckIn = new List<FolioCompare>();
+
+                string format = "yyyy-MM-dd";
+                CultureInfo cur = new CultureInfo("en-US");
+                string previousyear = dtHotelDate1;
+                string previousyear2 = dtHotelDate2;
+                string presentyear = dtHotelDate3;
+                string presentyear2 = dtHotelDate4;
+                Debug.WriteLine("Previous year: " + previousyear + "-" + previousyear2 + " Present year: " + presentyear + "-" + presentyear2);
+                string[] oldID; string[] newID; string[] oldSUM; string[] newSUM; string[] MergeID; string[] MergeOldSUM; string[] MergeNewSUM;
+                string[] oldName; string[] newName; string[] MergeName;
+                int oldCount, newCount, superCount, finalCount = 0;
+                ////// Get Previous Year //////
+                string sqlstring = "SELECT HotelItemServiceName, FolioItemID, SUM(SumTotalPrice) AS TotalPrice FROM( SELECT FolioDetailDate, FolioItemID, HotelItemServiceName, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge FROM HotelFolioDetail A JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID WHERE A.FolioStatusID<>99 AND B.ItemSign=1 AND A.FolioDetailDate>= '" + previousyear + "' AND A.FolioDetailDate< '" + previousyear2 + "' AND B.HotelItemServiceID>1000 GROUP BY A.FolioItemID UNION ALL SELECT FolioDetailDate, FolioItemID, HotelItemServiceName, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge FROM HotelFolioGroupDetail A JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID WHERE A.FolioStatusID<>99 AND B.ItemSign=1 AND A.FolioDetailDate>= '" + previousyear + "' AND A.FolioDetailDate< '" + previousyear2 + "' AND B.HotelItemServiceID>1000 GROUP BY A.FolioItemID) AS A Group by FolioItemID;";
+                DataTable dt = DBHelper.QueryListData(conn, sqlstring);
+                oldID = new string[dt.Rows.Count];
+                oldSUM = new string[dt.Rows.Count];
+                oldName = new string[dt.Rows.Count];
+                oldCount = dt.Rows.Count;
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    oldID[i] = dt.Rows[i]["FolioItemID"].ToString();
+                    oldSUM[i] = dt.Rows[i]["TotalPrice"].ToString();
+                    oldName[i] = dt.Rows[i]["HotelItemServiceName"].ToString();
+                }
+
+                ////// Get Present Year //////
+                string sqlstring2 = "SELECT HotelItemServiceName, FolioItemID, SUM(SumTotalPrice) AS TotalPrice FROM( SELECT FolioDetailDate, FolioItemID, HotelItemServiceName, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge FROM HotelFolioDetail A JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID WHERE A.FolioStatusID<>99 AND B.ItemSign=1 AND A.FolioDetailDate>= '" + presentyear + "' AND A.FolioDetailDate< '" + presentyear2 + "' AND B.HotelItemServiceID>1000 GROUP BY A.FolioItemID UNION ALL SELECT FolioDetailDate, FolioItemID, HotelItemServiceName, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge FROM HotelFolioGroupDetail A JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID WHERE A.FolioStatusID<>99 AND B.ItemSign=1 AND A.FolioDetailDate>= '" + presentyear + "' AND A.FolioDetailDate< '" + presentyear2 + "' AND B.HotelItemServiceID>1000 GROUP BY A.FolioItemID) AS A Group by FolioItemID;";
+                DataTable dt2 = DBHelper.QueryListData(conn, sqlstring2);
+                newID = new string[dt2.Rows.Count];
+                newSUM = new string[dt2.Rows.Count];
+                newName = new string[dt2.Rows.Count];
+                newCount = dt2.Rows.Count;
+                for (int i = 0; i < dt2.Rows.Count; i++)
+                {
+                    newID[i] = dt2.Rows[i]["FolioItemID"].ToString();
+                    newSUM[i] = dt2.Rows[i]["TotalPrice"].ToString();
+                    newName[i] = dt2.Rows[i]["HotelItemServiceName"].ToString();
+                }
+                ////// MERGE YEARS //////
+                if (oldCount > newCount)
+                {
+                    superCount = oldCount;
+                    finalCount = superCount;
+                    MergeID = new string[oldCount + newCount];
+                    MergeName = new string[oldCount + newCount];
+                    MergeNewSUM = new string[oldCount + newCount];
+                    MergeOldSUM = new string[oldCount + newCount];
+                } if (newCount > oldCount)
+                {
+                    superCount = newCount;
+                    finalCount = superCount;
+                    MergeID = new string[oldCount + newCount];
+                    MergeName = new string[oldCount + newCount];
+                    MergeNewSUM = new string[oldCount + newCount];
+                    MergeOldSUM = new string[oldCount + newCount];
+                }
+                else
+                {
+                    superCount = newCount;
+                    finalCount = superCount;
+                    MergeID = new string[oldCount + newCount];
+                    MergeName = new string[oldCount + newCount];
+                    MergeNewSUM = new string[oldCount + newCount];
+                    MergeOldSUM = new string[oldCount + newCount];
+                }
+
+                //oldCount > NewCount
+                if (oldCount > newCount)
+                {
+                    for (int i = 0; i < superCount; i++)
+                    {
+                        for (int j = 0; j < newCount; j++)
+                        {
+                            if (oldID[i] == newID[j])
+                            {
+                                MergeID[i] = oldID[i];
+                                MergeName[i] = oldName[i];
+                                MergeOldSUM[i] = oldSUM[i];
+                                MergeNewSUM[i] = newSUM[j];
+                                break;
+                            }
+                            if (j == newCount - 1)
+                            {
+                                MergeID[i] = oldID[i];
+                                MergeName[i] = oldName[i];
+                                MergeOldSUM[i] = oldSUM[i];
+                                MergeNewSUM[i] = "0";
+                            }
+                        }
+                    }
+                }////END oldCount > NewCount
+
+                //newCount > oldCount or newCount == oldCount
+                else
+                {
+                    for (int i = 0; i < superCount; i++)
+                    {
+                        for (int j = 0; j < oldCount; j++)
+                        {
+                            if (newID[i] == oldID[j])
+                            {
+                                MergeID[i] = newID[i];
+                                MergeName[i] = newName[i];
+                                MergeOldSUM[i] = oldSUM[j];
+                                MergeNewSUM[i] = newSUM[i];
+                                break;
+                            }
+                            if (j == oldCount - 1)
+                            {
+                                MergeID[i] = newID[i];
+                                MergeName[i] = newName[i];
+                                MergeOldSUM[i] = "0";
+                                MergeNewSUM[i] = newSUM[i];
+                            }
+                        }
+                    }
+                } //// END newCount > oldCount or newCount == oldCount
+
+                //Recheck
+                if (oldCount > newCount)
+                {
+                    int offset = 0;
+                    for (int i = 0; i < newCount; i++)
+                    {
+                        for (int j = 0; j < oldCount; j++)
+                        {
+                            if (newID[i] == oldID[j])
+                            {
+                                break;
+                            }
+                            if (j == oldCount - 1)
+                            {
+                                MergeID[oldCount + offset] = newID[i];
+                                MergeName[oldCount + offset] = newName[i];
+                                MergeNewSUM[oldCount + offset] = newSUM[i];
+                                MergeOldSUM[oldCount + offset] = "0";
+                                offset++;
+                                finalCount++;
+                            }
+                        }
+                    }
+                }
+
+                //if (newCount > oldCount) and newCount == oldCount
+                else
+                {
+                    int offset = 0;
+                    for (int i = 0; i < oldCount; i++)
+                    {
+                        for (int j = 0; j < newCount; j++)
+                        {
+                            if (oldID[i] == newID[j])
+                            {
+                                break;
+                            }
+                            if (j == newCount - 1)
+                            {
+                                MergeID[newCount + offset] = oldID[i];
+                                MergeName[newCount + offset] = oldName[i];
+                                MergeNewSUM[newCount + offset] = "0";
+                                MergeOldSUM[newCount + offset] = oldSUM[i];
+                                offset++;
+                                finalCount++;
+                            }
+                        }
+                    }
+                }
+
+                for (int i = 0; i < finalCount; i++)
+                {
+                    var xTrans = new FolioCompare();
+                    xTrans.id = MergeID[i];
+                    xTrans.name = MergeName[i];
+                    xTrans.previousSum = MergeOldSUM[i];
+                    xTrans.presentSum = MergeNewSUM[i];
+                    xAryTransCheckIn.Add(xTrans);
+                }
                 return xAryTransCheckIn;
             }
             catch (Exception err)

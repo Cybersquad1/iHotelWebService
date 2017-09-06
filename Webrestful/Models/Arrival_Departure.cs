@@ -56,14 +56,16 @@ namespace Webrestful.Models
                     xTrans.Roomno = dt.Rows[i]["RoomName"].ToString();
                     xTrans.Roomtype = dt.Rows[i]["RoomTypeName"].ToString();
                     decimal ABF = (dt.Rows[i]["Rsvn_AbfPrice"] == DBNull.Value) ? 0 : decimal.Parse(dt.Rows[i]["Rsvn_AbfPrice"].ToString());
-                    xTrans.ABF  = ABF.ToString(matcur);
                     string paxa = dt.Rows[i]["Rsvn_PaxAdult"].ToString();
                     string paxc = dt.Rows[i]["Rsvn_PaxChild"].ToString();
+                    int totalPax = int.Parse(paxa) + int.Parse(paxc);
+                    decimal totalABF = ABF * totalPax;
                     xTrans.Pax = paxa + "/" + paxc;
-
+                    xTrans.ABF = (ABF * totalPax).ToString(matcur);
+                    //xTrans.ABF  = ABF.ToString(matcur);
                     if (int.Parse(dt.Rows[i]["Rsvn_AbfInc"].ToString()) == 1)
                     {
-                        decimal R_Rate = (decimal.Parse(dt.Rows[i]["Rsvn_RoomPrice"].ToString())) - (decimal.Parse(dt.Rows[i]["Rsvn_AbfPrice"].ToString()));
+                        decimal R_Rate = (decimal.Parse(dt.Rows[i]["Rsvn_RoomPrice"].ToString())) - totalABF;
                         xTrans.R_Rate = R_Rate.ToString(matcur);
                     }
                     else
