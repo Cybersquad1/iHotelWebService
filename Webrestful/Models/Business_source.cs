@@ -102,11 +102,11 @@ namespace Webrestful.Models
                 {
                     for (int j = 0; j < dtFIT.Rows.Count; j++)
                     {
-                        float sum = 0;
+                        double sum = 0.00;
                         var xTrans = new NoDefine();
                         xTrans.month = dtFIT.Rows[j]["AtMonth"].ToString();
-                        sum = float.Parse(dtFIT.Rows[j]["SUM(TotalPrice)"].ToString());
-                        xTrans.sum = sum.ToString("0.");
+                        sum = Double.Parse(dtFIT.Rows[j]["SUM(TotalPrice)"].ToString());
+                        xTrans.sum = sum.ToString("N2");
                         GovernmentList.Add(xTrans);
                     }
                 }
