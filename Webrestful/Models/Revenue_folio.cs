@@ -20,7 +20,7 @@ namespace Webrestful.Models
             CultureInfo cur = new CultureInfo("en-US");
             string startdate = dtHotelDate1.ToString(format, cur);
 
-            string sqlstring = "  SELECT FolioDetailDate, FolioItemID, HotelItemServiceName, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge FROM HotelFolioDetail A JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID WHERE A.FolioStatusID<>99 AND B.ItemSign=1 AND A.FolioDetailDate= '"+startdate+"' AND B.HotelItemServiceID>1000 GROUP BY A.FolioItemID UNION ALL SELECT FolioDetailDate, FolioItemID, HotelItemServiceName, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge FROM HotelFolioGroupDetail A JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID WHERE A.FolioStatusID<>99 AND B.ItemSign=1 AND A.FolioDetailDate= '"+startdate+"' AND B.HotelItemServiceID>1000 GROUP BY A.FolioItemID ;";
+            string sqlstring = "SELECT FolioDetailDate, HotelItemServiceName, SUM(SumTotalPrice) as SumTotalPrice, SUM(TotalPrice) as TotalPrice, SUM(TotalVat) as TotalVat,TotalServiceCharge as TotalSrvCharge,FolioItemID FROM( SELECT FolioDetailDate, FolioItemID, HotelItemServiceName, TotalServiceCharge, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge FROM HotelFolioDetail A JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID WHERE A.FolioStatusID<>99 AND B.ItemSign=1 AND A.FolioDetailDate='" + startdate + "' AND B.HotelItemServiceID>1000 GROUP BY A.FolioItemID UNION ALL SELECT FolioDetailDate, FolioItemID, HotelItemServiceName,TotalServiceCharge, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge FROM HotelFolioGroupDetail A JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID WHERE A.FolioStatusID<>99 AND B.ItemSign=1 AND A.FolioDetailDate='" + startdate + "' AND B.HotelItemServiceID>1000 GROUP BY A.FolioItemID ) AS A GROUP BY FolioItemID;";
             string matcur = ("N");
             decimal SRevenue = 0;
             decimal SVat = 0;
@@ -72,25 +72,7 @@ namespace Webrestful.Models
                 string startdate = dtHotelDate1.ToString(format, cur);
                 string enddate = dtHotelDate2.ToString(format, cur);
 
-                string sqlstring = "SELECT FolioDetailDate, FolioItemID, HotelItemServiceName, " +
-                "SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, " +
-                "SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge " +
-                "FROM HotelFolioDetail A " +
-                "JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID " +
-                "WHERE A.FolioStatusID<>99 AND B.ItemSign=1 " +
-                "AND A.FolioDetailDate>= '" + startdate + "' AND A.FolioDetailDate<= '" + enddate + "' " +
-                "AND B.HotelItemServiceID>1000 " +
-                "GROUP BY A.FolioItemID " +
-                "UNION ALL " +
-                "SELECT FolioDetailDate, FolioItemID, HotelItemServiceName, " +
-                "SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, " +
-                 "SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge " +
-                "FROM HotelFolioGroupDetail A " +
-                "JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID " +
-                "WHERE A.FolioStatusID<>99 AND B.ItemSign=1 " +
-                "AND A.FolioDetailDate>= '" + startdate + "' AND A.FolioDetailDate<= '" + enddate + "' " +
-                "AND B.HotelItemServiceID>1000 " +
-                "GROUP BY A.FolioItemID ";
+                string sqlstring = "SELECT FolioDetailDate, HotelItemServiceName, SUM(SumTotalPrice) as SumTotalPrice, SUM(TotalPrice) as TotalPrice, SUM(TotalVat) as TotalVat,TotalServiceCharge as TotalSrvCharge,FolioItemID FROM( SELECT FolioDetailDate, FolioItemID, HotelItemServiceName, TotalServiceCharge, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge FROM HotelFolioDetail A JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID WHERE A.FolioStatusID<>99 AND B.ItemSign=1 AND A.FolioDetailDate>='" + startdate + "' AND A.FolioDetailDate<='" + enddate + "' AND B.HotelItemServiceID>1000 GROUP BY A.FolioItemID UNION ALL SELECT FolioDetailDate, FolioItemID, HotelItemServiceName,TotalServiceCharge, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS SumTotalPrice, SUM(TotalItemPrice) AS TotalPrice, SUM(TotalItemVat+TotalServiceChargeVat) AS TotalVat, SUM(TotalServiceCharge) AS TotalSrvCharge FROM HotelFolioGroupDetail A JOIN HotelItemService B ON A.FolioItemID=B.HotelItemServiceID WHERE A.FolioStatusID<>99 AND B.ItemSign=1 AND A.FolioDetailDate>='" + startdate + "' AND A.FolioDetailDate<='" + enddate + "' AND B.HotelItemServiceID>1000 GROUP BY A.FolioItemID ) AS A GROUP BY FolioItemID";
 
                 string matcur = ("N");
                 decimal SRevenue = 0;

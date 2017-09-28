@@ -394,69 +394,86 @@ namespace Webrestful.Models
             dtRes.Columns.Add("TotalABF", typeof(decimal));
 
 
-            string szFmtFIT = "";
+            //string szFmtFIT = "";
+            //if (vat == 0)
+            //    szFmtFIT = "SELECT A.FolioDetailDate, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS TotalPrice " +
+            //                "FROM HotelFolioDetail A " +
+            //                "JOIN HotelTransaction B ON A.TransactionID=B.TransactionID " +
+            //                "WHERE A.FolioStatusID<>99 AND FolioItemID IN ({0},{1}) " +
+            //                 "AND A.FolioDetailDate>='" + startdate + "' AND A.FolioDetailDate<'" + enddate + "'" +
+            //                "GROUP BY A.FolioDetailDate";
+            //else
+            //    szFmtFIT = "SELECT A.FolioDetailDate, SUM(TotalItemPrice) AS TotalPrice " +
+            //                "FROM HotelFolioDetail A " +
+            //                "JOIN HotelTransaction B ON A.TransactionID=B.TransactionID " +
+            //                "WHERE A.FolioStatusID<>99 AND FolioItemID IN ({0},{1}) " +
+            //                 "AND A.FolioDetailDate>='" + startdate + "' AND A.FolioDetailDate<'" + enddate + "'" +
+            //                "GROUP BY A.FolioDetailDate";
+
+            //string szFmtGroup = "";
+            //if (vat == 1)
+            //    szFmtGroup = "SELECT A.FolioDetailDate, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS TotalPrice " +
+            //                "FROM HotelFolioGroupDetail A " +
+            //                "JOIN HotelTransaction B ON A.TransactionID=B.TransactionID " +
+            //                "WHERE A.FolioStatusID<>99 AND FolioItemID IN ({0},{1}) " +
+            //                "AND A.FolioDetailDate>='" + startdate + "' AND A.FolioDetailDate<'" + enddate + "'" +
+            //                "GROUP BY A.FolioDetailDate";
+            //else
+            //    szFmtGroup = "SELECT A.FolioDetailDate, SUM(TotalItemPrice) AS TotalPrice " +
+            //                    "FROM HotelFolioGroupDetail A " +
+            //                    "JOIN HotelTransaction B ON A.TransactionID=B.TransactionID " +
+            //                    "WHERE A.FolioStatusID<>99 AND FolioItemID IN ({0},{1}) " +
+            //                     "AND A.FolioDetailDate>='" + startdate + "' AND A.FolioDetailDate<'" + enddate + "'" +
+            //                    "GROUP BY A.FolioDetailDate";
+            string szFmt = "";
             if (vat == 0)
-                szFmtFIT = "SELECT A.FolioDetailDate, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS TotalPrice " +
-                            "FROM HotelFolioDetail A " +
-                            "JOIN HotelTransaction B ON A.TransactionID=B.TransactionID " +
-                            "WHERE A.FolioStatusID<>99 AND FolioItemID IN ({0},{1}) " +
-                             "AND A.FolioDetailDate>='" + startdate + "' AND A.FolioDetailDate<'" + enddate + "'" +
-                            "GROUP BY A.FolioDetailDate";
+                szFmt = "SELECT FolioDate, SUM(TotalPrice) AS TotalPrice From(SELECT A.FolioDetailDate AS FolioDate, SUM(TotalItemPrice) AS TotalPrice FROM HotelFolioDetail A JOIN HotelTransaction B ON A.TransactionID=B.TransactionID WHERE A.FolioStatusID<>99 AND FolioItemID IN ({0},{1}) AND (A.FolioDetailDate)>='" + startdate + "' AND (A.FolioDetailDate)<'" + enddate + "' GROUP BY FolioDate UNION ALL SELECT A.FolioDetailDate AS FolioDate, SUM(TotalItemPrice) AS TotalPrice FROM HotelFolioGroupDetail A JOIN HotelTransaction B ON A.TransactionID=B.TransactionID WHERE A.FolioStatusID<>99 AND FolioItemID IN ({0},{1}) AND (A.FolioDetailDate)>='" + startdate + "' AND (A.FolioDetailDate)<'" + enddate + "' GROUP BY FolioDate) AS A GROUP BY FolioDate";
             else
-                szFmtFIT = "SELECT A.FolioDetailDate, SUM(TotalItemPrice) AS TotalPrice " +
-                            "FROM HotelFolioDetail A " +
-                            "JOIN HotelTransaction B ON A.TransactionID=B.TransactionID " +
-                            "WHERE A.FolioStatusID<>99 AND FolioItemID IN ({0},{1}) " +
-                             "AND A.FolioDetailDate>='" + startdate + "' AND A.FolioDetailDate<'" + enddate + "'" +
-                            "GROUP BY A.FolioDetailDate";
+                szFmt = "SELECT FolioDate, SUM(TotalPrice) AS TotalPrice From(SELECT A.FolioDetailDate AS FolioDate, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS TotalPrice FROM HotelFolioDetail A JOIN HotelTransaction B ON A.TransactionID=B.TransactionID WHERE A.FolioStatusID<>99 AND FolioItemID IN ({0},{1}) AND (A.FolioDetailDate)>='" + startdate + "' AND (A.FolioDetailDate)<'" + enddate + "' GROUP BY A.FolioDetailDate UNION ALL SELECT A.FolioDetailDate AS FolioDate, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS TotalPrice FROM HotelFolioGroupDetail A JOIN HotelTransaction B ON A.TransactionID=B.TransactionID WHERE A.FolioStatusID<>99 AND FolioItemID IN ({0},{1}) AND (A.FolioDetailDate)>='" + startdate + "' AND (A.FolioDetailDate)<'" + enddate + "' GROUP BY A.FolioDetailDate) AS A GROUP BY FolioDate";
 
-            string szFmtGroup = "";
-            if (vat == 1)
-                szFmtGroup = "SELECT A.FolioDetailDate, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS TotalPrice " +
-                            "FROM HotelFolioGroupDetail A " +
-                            "JOIN HotelTransaction B ON A.TransactionID=B.TransactionID " +
-                            "WHERE A.FolioStatusID<>99 AND FolioItemID IN ({0},{1}) " +
-                            "AND A.FolioDetailDate>='" + startdate + "' AND A.FolioDetailDate<'" + enddate + "'" +
-                            "GROUP BY A.FolioDetailDate";
-            else
-                szFmtGroup = "SELECT A.FolioDetailDate, SUM(TotalItemPrice) AS TotalPrice " +
-                                "FROM HotelFolioGroupDetail A " +
-                                "JOIN HotelTransaction B ON A.TransactionID=B.TransactionID " +
-                                "WHERE A.FolioStatusID<>99 AND FolioItemID IN ({0},{1}) " +
-                                 "AND A.FolioDetailDate>='" + startdate + "' AND A.FolioDetailDate<'" + enddate + "'" +
-                                "GROUP BY A.FolioDetailDate";
+            //string szQuery = string.Format(szFmtFIT, 1001, 2001);
+            //DataTable dtFitRC = DBHelper.QueryListData(conn, szQuery);
 
-            string szQuery = string.Format(szFmtFIT, 1001, 2001);
-            DataTable dtFitRC = DBHelper.QueryListData(conn, szQuery);
+            //szQuery = string.Format(szFmtGroup, 1001, 2001);
+            //DataTable dtGroupRC = DBHelper.QueryListData(conn, szQuery);
 
-            szQuery = string.Format(szFmtGroup, 1001, 2001);
-            DataTable dtGroupRC = DBHelper.QueryListData(conn, szQuery);
+            //szQuery = string.Format(szFmtFIT, 1002, 2002);
+            //DataTable dtFitABF = DBHelper.QueryListData(conn, szQuery);
 
-            szQuery = string.Format(szFmtFIT, 1002, 2002);
-            DataTable dtFitABF = DBHelper.QueryListData(conn, szQuery);
-
-            szQuery = string.Format(szFmtGroup, 1002, 2002);
-            DataTable dtGroupABF = DBHelper.QueryListData(conn, szQuery);
-
+            //szQuery = string.Format(szFmtGroup, 1002, 2002);
+            //DataTable dtGroupABF = DBHelper.QueryListData(conn, szQuery);
+            ///// NEW /////
+            string szQuery = string.Format(szFmt, 1001, 2001);
+            DataTable dtRc = DBHelper.QueryListData(conn, szQuery);
+            szQuery = string.Format(szFmt, 1002, 2002);
+            DataTable dtABF = DBHelper.QueryListData(conn, szQuery);
             for (int i = 1; i <= days; i++)
             {
                 decimal fTotalRC = 0, fTotalABF = 0;
                 DateTime dtDate = new DateTime(year, month, i);
-                DataRow[] row = dtFitRC.Select("FolioDetailDate=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
+                //DataRow[] row = dtFitRC.Select("FolioDetailDate=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
+                //if (row.Length > 0)
+                //    fTotalRC = decimal.Parse(row[0][1].ToString());
+
+                //row = dtGroupRC.Select("FolioDetailDate=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
+                //if (row.Length > 0)
+                //    fTotalRC += decimal.Parse(row[0][1].ToString());
+
+                //row = dtFitABF.Select("FolioDetailDate=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
+                //if (row.Length > 0)
+                //    fTotalABF = decimal.Parse(row[0][1].ToString());
+
+                //row = dtGroupABF.Select("FolioDetailDate=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
+                //if (row.Length > 0)
+                //    fTotalABF += decimal.Parse(row[0][1].ToString());
+
+                DataRow[] row = dtRc.Select("FolioDate=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
                 if (row.Length > 0)
                     fTotalRC = decimal.Parse(row[0][1].ToString());
 
-                row = dtGroupRC.Select("FolioDetailDate=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
-                if (row.Length > 0)
-                    fTotalRC += decimal.Parse(row[0][1].ToString());
-
-                row = dtFitABF.Select("FolioDetailDate=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
+                row = dtABF.Select("FolioDate=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
                 if (row.Length > 0)
                     fTotalABF = decimal.Parse(row[0][1].ToString());
-
-                row = dtGroupABF.Select("FolioDetailDate=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
-                if (row.Length > 0)
-                    fTotalABF += decimal.Parse(row[0][1].ToString());
 
                 DataRow dr = dtRes.NewRow();
                 dr["Date"] = dtDate;
