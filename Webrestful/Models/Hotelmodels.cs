@@ -218,4 +218,8 @@ namespace Webrestful.Models
         public string previousSum { get; set; }
         public string presentSum { get; set; }
     }
+    public class RoleUser
+    {
+        public string PermissionFunctionID { get; set; }
+    }
 }

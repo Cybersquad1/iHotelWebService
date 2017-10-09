@@ -49,7 +49,33 @@ namespace Webrestful.Models
                 return 0;
             }
         }
-
+        public static List<RoleUser> UserRole(MySqlConnection conn, string szUserLogin, string szPassword, ref string szErrMsg)
+        {
+            var xAryTransCheckIn = new List<RoleUser>();
+            string[] id;
+            try
+            {
+                string szFmt = "SELECT PermissionFunctionID FROM Users A JOIN Permissionfunctionsetting B ON A.UserRoleID = B.UserRoleID WHERE UserLogin = '" + szUserLogin + "' AND UserPassword = '" + szPassword + "' AND B.PermissionFunctionID IN(32,33,34,35)";
+                DataTable dt = DBHelper.QueryListData(conn, szFmt);
+                id = new string[dt.Rows.Count];
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    id[i] = dt.Rows[i]["PermissionFunctionID"].ToString();
+                }
+                for (int j = 0; j < dt.Rows.Count; j++)
+                {
+                    var xTrans = new RoleUser();
+                    xTrans.PermissionFunctionID = id[j];
+                    xAryTransCheckIn.Add(xTrans);
+                }
+                return xAryTransCheckIn;
+            }
+            catch (Exception err)
+            {
+                szErrMsg = err.Message;
+                return null;
+            }
+        }
         public static DateTime GetCurrentHotelDate(MySqlConnection conn)
         {
             string szQuery = "SELECT MAX(HotelDate) FROM HotelEndDayInfo WHERE CloseShiftDate is null";

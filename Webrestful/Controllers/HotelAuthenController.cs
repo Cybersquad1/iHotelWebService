@@ -32,7 +32,34 @@ namespace Webrestful.Controllers
 
         //    return Request.CreateResponse(HttpStatusCode.OK, result);
         //}
+        [HttpGet]
+        public HttpResponseMessage CheckUserRole(string szHotelDB, string szIPServer, string szUserLogin, string szPassword, string szDeviceCode)
+        {
+            var result = new Response();
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szIPServer);
+            if (conn == null)
+            {
+                result.status = -1;
+                result.dataResult = "Fail Connect Database";
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, result);
+            }
 
+            string szErrMsg = "";
+            var xListTransInfo = HotelAuthenAPI.UserRole(conn, szUserLogin, szPassword, ref szErrMsg);
+            if (xListTransInfo == null)
+            {
+                result.status = 1;
+                result.dataResult = szErrMsg;
+            }
+            else
+            {
+                result.status = 0;
+                result.dataResult = xListTransInfo;
+            }
+
+            DBHelper.CloseConnection(conn);
+            return Request.CreateResponse(HttpStatusCode.OK, result);
+        }
         [HttpGet]
         public HttpResponseMessage VerifyUserNamePassword(string szHotelDB, string szIPServer, string szUserLogin, string szPassword, string szDeviceCode)
         {
