@@ -5,7 +5,7 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Web;
-
+using System.Diagnostics;
 namespace Webrestful.Models
 {
     public class HistoryandForcast
@@ -76,7 +76,7 @@ namespace Webrestful.Models
             }
         }
 
-        public static List<HisandFor> GetForcasts(MySqlConnection conn, DateTime dtHotelDate, DateTime dtHotelDate2,  ref string szErrMsg)
+        public static List<HisandFor> GetForcasts(MySqlConnection conn, DateTime dtHotelDate, DateTime dtHotelDate2, int vat, ref string szErrMsg)
         {
             try
             {
@@ -98,7 +98,7 @@ namespace Webrestful.Models
 
               
                 dtTotalOccPax = GetTotalOccPaxForecast(conn, startdate, enddate, days, year, month);
-                dtTotalRevenue = GetTotalRevenueForecast(conn, startdate, enddate, days, year, month);
+                dtTotalRevenue = GetTotalRevenueForecast(conn, startdate, enddate, days, year, month, vat);
 
                 int iTotalRooms = GetTotalRooms(conn);
 
@@ -198,116 +198,147 @@ namespace Webrestful.Models
 
             return dtRes;
         }
-
-        protected static DataTable GetTotalRevenueForecast(MySqlConnection conn, string startdate, string enddate, int days, int year, int month)
-        {
+        protected static DataTable GetTotalRevenueForecast(MySqlConnection conn, string startdate, string enddate, int days, int year, int month, int vat) {
             DataTable dtRes = new DataTable();
             dtRes.Columns.Add("Date", typeof(DateTime));
             dtRes.Columns.Add("TotalRoomCharge", typeof(decimal));
             dtRes.Columns.Add("TotalABF", typeof(decimal));
 
-            int iVatType = 0, iServiceChargeType = 0;
-            decimal fVatRate = 0, fServiceChargeRate = 0;
-            GetVatTypeServiceChargeType(conn ,ref iVatType, ref iServiceChargeType, ref fVatRate, ref fServiceChargeRate);
-
-            string szFmtRsvnFIT = "SELECT Rsvn_Date, SUM(RoomPrice) AS SumRoomPrice, SUM(AbfPrice) AS SumAbfPrice FROM (" +
-                                  "SELECT A.Rsvn_Date, " +
-                                  "IF (A.Rsvn_AbfInc = 1, Rsvn_RoomPrice-(Rsvn_AbfPrice*(B.Rsvn_PaxAdult+B.Rsvn_PaxChild)), Rsvn_RoomPrice) AS RoomPrice, " +
-                                  "Rsvn_AbfPrice*(B.Rsvn_PaxAdult+B.Rsvn_PaxChild) AS AbfPrice " +
-                                  "FROM RsvnRoomInfo A " +
-                                  "JOIN RsvnTransaction B ON A.Rsvn_TransID=B.Rsvn_TransID " +
-                                  "WHERE B.Rsvn_StatusID<10 " +
-                                   "AND A.Rsvn_Date>='" + startdate + "' AND A.Rsvn_Date<'" + enddate + "'" +
-                                  "ORDER BY A.Rsvn_Date) AS A " +
-                                  "GROUP BY Rsvn_Date";
-
-            string szFmtRsvnGroup =
-                "SELECT Rsvn_Date, SUM(RoomPrice) AS SumRoomPrice, SUM(AbfPrice) AS SumAbfPrice FROM (" +
-                "SELECT A.Rsvn_Date, " +
-                "IF (A.Rsvn_AbfInc = 1, Rsvn_RoomPrice-(Rsvn_AbfPrice*(B.Rsvn_PaxAdult+B.Rsvn_PaxChild)), Rsvn_RoomPrice) AS RoomPrice, " +
-                "Rsvn_AbfPrice*(B.Rsvn_PaxAdult+B.Rsvn_PaxChild) AS AbfPrice " +
-                "FROM RsvnGroupDetail A " +
-                "JOIN RsvnGroupInfo B ON A.Rsvn_TransID=B.Rsvn_TransID AND A.Rsvn_GroupID=B.Rsvn_GroupID " +
-                "JOIN RsvnTransaction C ON A.Rsvn_TransID=C.Rsvn_TransID " +
-                "WHERE C.Rsvn_StatusID<10 " +
-                 "AND A.Rsvn_Date>='" + startdate + "' AND A.Rsvn_Date<'" + enddate + "'" +
-                "ORDER BY A.Rsvn_Date) AS A " +
-                "GROUP BY Rsvn_Date";
-
-            string szFmtTransFIT =
-                "SELECT Trans_Date, SUM(RoomPrice) AS SumRoomPrice, SUM(AbfPrice) AS SumAbfPrice FROM (" +
-                "SELECT A.Trans_Date, " +
-                "IF (A.Trans_AbfInc = 1, Trans_RoomPrice-(Trans_AbfPrice*(B.Trans_PaxAdult+B.Trans_PaxChild)), Trans_RoomPrice) AS RoomPrice, " +
-                "Trans_AbfPrice*(B.Trans_PaxAdult+B.Trans_PaxChild) AS AbfPrice " +
-                "FROM HotelTransRoomInfo A " +
-                "JOIN HotelTransaction B ON A.TransactionID=B.TransactionID " +
-                "WHERE B.Trans_StatusID<90 " +
-                 "AND A.Trans_Date>='" + startdate + "' AND A.Trans_Date<'" + enddate + "'" +
-                "ORDER BY A.Trans_Date) AS A " +
-                "GROUP BY Trans_Date";
-
-            string szFmtTransGroup =
-                "SELECT Trans_Date, SUM(RoomPrice) AS SumRoomPrice, SUM(AbfPrice) AS SumAbfPrice FROM (" +
-                "SELECT A.Trans_Date, " +
-                "IF (A.Trans_AbfInc = 1, Trans_RoomPrice-(Trans_AbfPrice*(B.Trans_PaxAdult+B.Trans_PaxChild)), Trans_RoomPrice) AS RoomPrice, " +
-                "Trans_AbfPrice*(B.Trans_PaxAdult+B.Trans_PaxChild) AS AbfPrice " +
-                "FROM HotelTransGroupDetail A " +
-                "JOIN HotelTransGroupInfo B ON A.TransactionID=B.TransactionID AND A.Trans_GroupID=B.Trans_GroupID " +
-                "JOIN HotelTransaction C ON A.TransactionID=C.TransactionID " +
-                "WHERE C.Trans_StatusID<90 " +
-                 "AND A.Trans_Date>='" + startdate + "' AND A.Trans_Date<'" + enddate + "'" +
-                "ORDER BY A.Trans_Date) AS A " +
-                "GROUP BY Trans_Date ";
-
-           DataTable dtRsvnFit = DBHelper.QueryListData(conn, szFmtRsvnFIT);
-
-           DataTable dtRsvnGroup = DBHelper.QueryListData(conn, szFmtRsvnGroup);
-
-          DataTable dtTransFit = DBHelper.QueryListData(conn, szFmtTransFIT);
-
-          DataTable dtTransGroup = DBHelper.QueryListData(conn, szFmtTransGroup);
-
-            for (int i = 1; i <= days; i++)
+            string szFmt = "";
+            if (vat == 0)
+                szFmt = "SELECT DATE_FORMAT(Date, '%Y-%m-%d') as Date, (SUM(RoomPrice)*100)/107 AS SumRoomPrice, (SUM(AbfPrice)*100)/107 AS SumAbfPrice FROM ( SELECT A.Rsvn_Date AS Date, IF (A.Rsvn_AbfInc = 1, Rsvn_RoomPrice-(Rsvn_AbfPrice*(B.Rsvn_PaxAdult+B.Rsvn_PaxChild)), Rsvn_RoomPrice) AS RoomPrice, Rsvn_AbfPrice*(B.Rsvn_PaxAdult+B.Rsvn_PaxChild) AS AbfPrice FROM RsvnRoomInfo A JOIN RsvnTransaction B ON A.Rsvn_TransID=B.Rsvn_TransID WHERE B.Rsvn_StatusID<10 AND A.Rsvn_Date>='" + startdate + "' AND A.Rsvn_Date<'" + enddate + "' UNION ALL SELECT A.Rsvn_Date AS Date, IF (A.Rsvn_AbfInc = 1, Rsvn_RoomPrice-(Rsvn_AbfPrice*(B.Rsvn_PaxAdult+B.Rsvn_PaxChild)), Rsvn_RoomPrice) AS RoomPrice, Rsvn_AbfPrice*(B.Rsvn_PaxAdult+B.Rsvn_PaxChild) AS AbfPrice FROM RsvnGroupDetail A JOIN RsvnGroupInfo B ON A.Rsvn_TransID=B.Rsvn_TransID AND A.Rsvn_GroupID=B.Rsvn_GroupID JOIN RsvnTransaction C ON A.Rsvn_TransID=C.Rsvn_TransID WHERE C.Rsvn_StatusID<10 AND A.Rsvn_Date>='" + startdate + "' AND A.Rsvn_Date<'" + enddate + "' UNION ALL SELECT A.Trans_Date AS Date, IF (A.Trans_AbfInc = 1, Trans_RoomPrice-(Trans_AbfPrice*(B.Trans_PaxAdult+B.Trans_PaxChild)), Trans_RoomPrice) AS RoomPrice, Trans_AbfPrice*(B.Trans_PaxAdult+B.Trans_PaxChild) AS AbfPrice FROM HotelTransRoomInfo A JOIN HotelTransaction B ON A.TransactionID=B.TransactionID WHERE B.Trans_StatusID<90 AND A.Trans_Date>='" + startdate + "' AND A.Trans_Date<'" + enddate + "' UNION ALL SELECT A.Trans_Date AS Date, IF (A.Trans_AbfInc = 1, Trans_RoomPrice-(Trans_AbfPrice*(B.Trans_PaxAdult+B.Trans_PaxChild)), Trans_RoomPrice) AS RoomPrice, Trans_AbfPrice*(B.Trans_PaxAdult+B.Trans_PaxChild) AS AbfPrice FROM HotelTransGroupDetail A JOIN HotelTransGroupInfo B ON A.TransactionID=B.TransactionID AND A.Trans_GroupID=B.Trans_GroupID JOIN HotelTransaction C ON A.TransactionID=C.TransactionID WHERE C.Trans_StatusID<90 AND A.Trans_Date>='" + startdate + "' AND A.Trans_Date<'" + enddate + "' ) AS A GROUP BY Date";
+            else
+                szFmt = "SELECT DATE_FORMAT(Date, '%Y-%m-%d') as Date, SUM(RoomPrice) AS SumRoomPrice, SUM(AbfPrice) AS SumAbfPrice FROM ( SELECT A.Rsvn_Date AS Date, IF (A.Rsvn_AbfInc = 1, Rsvn_RoomPrice-(Rsvn_AbfPrice*(B.Rsvn_PaxAdult+B.Rsvn_PaxChild)), Rsvn_RoomPrice) AS RoomPrice, Rsvn_AbfPrice*(B.Rsvn_PaxAdult+B.Rsvn_PaxChild) AS AbfPrice FROM RsvnRoomInfo A JOIN RsvnTransaction B ON A.Rsvn_TransID=B.Rsvn_TransID WHERE B.Rsvn_StatusID<10 AND A.Rsvn_Date>='" + startdate + "' AND A.Rsvn_Date<'" + enddate + "' UNION ALL SELECT A.Rsvn_Date AS Date, IF (A.Rsvn_AbfInc = 1, Rsvn_RoomPrice-(Rsvn_AbfPrice*(B.Rsvn_PaxAdult+B.Rsvn_PaxChild)), Rsvn_RoomPrice) AS RoomPrice, Rsvn_AbfPrice*(B.Rsvn_PaxAdult+B.Rsvn_PaxChild) AS AbfPrice FROM RsvnGroupDetail A JOIN RsvnGroupInfo B ON A.Rsvn_TransID=B.Rsvn_TransID AND A.Rsvn_GroupID=B.Rsvn_GroupID JOIN RsvnTransaction C ON A.Rsvn_TransID=C.Rsvn_TransID WHERE C.Rsvn_StatusID<10 AND A.Rsvn_Date>='" + startdate + "' AND A.Rsvn_Date<'" + enddate + "' UNION ALL SELECT A.Trans_Date AS Date, IF (A.Trans_AbfInc = 1, Trans_RoomPrice-(Trans_AbfPrice*(B.Trans_PaxAdult+B.Trans_PaxChild)), Trans_RoomPrice) AS RoomPrice, Trans_AbfPrice*(B.Trans_PaxAdult+B.Trans_PaxChild) AS AbfPrice FROM HotelTransRoomInfo A JOIN HotelTransaction B ON A.TransactionID=B.TransactionID WHERE B.Trans_StatusID<90 AND A.Trans_Date>='" + startdate + "' AND A.Trans_Date<'" + enddate + "' UNION ALL SELECT A.Trans_Date AS Date, IF (A.Trans_AbfInc = 1, Trans_RoomPrice-(Trans_AbfPrice*(B.Trans_PaxAdult+B.Trans_PaxChild)), Trans_RoomPrice) AS RoomPrice, Trans_AbfPrice*(B.Trans_PaxAdult+B.Trans_PaxChild) AS AbfPrice FROM HotelTransGroupDetail A JOIN HotelTransGroupInfo B ON A.TransactionID=B.TransactionID AND A.Trans_GroupID=B.Trans_GroupID JOIN HotelTransaction C ON A.TransactionID=C.TransactionID WHERE C.Trans_StatusID<90 AND A.Trans_Date>='" + startdate + "' AND A.Trans_Date<'" + enddate + "' )AS A GROUP BY Date";
+            DataTable dtRc = DBHelper.QueryListData(conn, szFmt);
+            for(int i = 1; i <= days; i++)
             {
                 decimal fTotalRC = 0, fTotalABF = 0;
+                Debug.WriteLine("Year:"+year+" Month: "+month+" Days: "+days);
                 DateTime dtDate = new DateTime(year, month, i);
-                DataRow[] row = dtRsvnFit.Select("Rsvn_Date=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
+                Debug.WriteLine(dtDate);
+                DataRow[] row = dtRc.Select("Date=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
                 if (row.Length > 0)
                 {
                     fTotalRC = decimal.Parse(row[0][1].ToString());
                     fTotalABF = decimal.Parse(row[0][2].ToString());
                 }
-
-                row = dtRsvnGroup.Select("Rsvn_Date=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
-                if (row.Length > 0)
-                {
-                    fTotalRC += decimal.Parse(row[0][1].ToString());
-                    fTotalABF += decimal.Parse(row[0][2].ToString());
-                }
-
-                row = dtTransFit.Select("Trans_Date=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
-                if (row.Length > 0)
-                {
-                    fTotalRC += decimal.Parse(row[0][1].ToString());
-                    fTotalABF += decimal.Parse(row[0][2].ToString());
-                }
-
-                row = dtTransGroup.Select("Trans_Date=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
-                if (row.Length > 0)
-                {
-                    fTotalRC += decimal.Parse(row[0][1].ToString());
-                    fTotalABF += decimal.Parse(row[0][2].ToString());
-                }
-
                 DataRow dr = dtRes.NewRow();
                 dr["Date"] = dtDate;
                 dr["TotalRoomCharge"] = fTotalRC;
                 dr["TotalABF"] = fTotalABF;
                 dtRes.Rows.Add(dr);
             }
-
             return dtRes;
         }
+        //protected static DataTable GetTotalRevenueForecast(MySqlConnection conn, string startdate, string enddate, int days, int year, int month)
+        //{
+        //    DataTable dtRes = new DataTable();
+        //    dtRes.Columns.Add("Date", typeof(DateTime));
+        //    dtRes.Columns.Add("TotalRoomCharge", typeof(decimal));
+        //    dtRes.Columns.Add("TotalABF", typeof(decimal));
+
+        //    int iVatType = 0, iServiceChargeType = 0;
+        //    decimal fVatRate = 0, fServiceChargeRate = 0;
+        //    GetVatTypeServiceChargeType(conn ,ref iVatType, ref iServiceChargeType, ref fVatRate, ref fServiceChargeRate);
+
+        //    string szFmtRsvnFIT = "SELECT Rsvn_Date, SUM(RoomPrice) AS SumRoomPrice, SUM(AbfPrice) AS SumAbfPrice FROM (" +
+        //                          "SELECT A.Rsvn_Date, " +
+        //                          "IF (A.Rsvn_AbfInc = 1, Rsvn_RoomPrice-(Rsvn_AbfPrice*(B.Rsvn_PaxAdult+B.Rsvn_PaxChild)), Rsvn_RoomPrice) AS RoomPrice, " +
+        //                          "Rsvn_AbfPrice*(B.Rsvn_PaxAdult+B.Rsvn_PaxChild) AS AbfPrice " +
+        //                          "FROM RsvnRoomInfo A " +
+        //                          "JOIN RsvnTransaction B ON A.Rsvn_TransID=B.Rsvn_TransID " +
+        //                          "WHERE B.Rsvn_StatusID<10 " +
+        //                           "AND A.Rsvn_Date>='" + startdate + "' AND A.Rsvn_Date<'" + enddate + "'" +
+        //                          "ORDER BY A.Rsvn_Date) AS A " +
+        //                          "GROUP BY Rsvn_Date";
+
+        //    string szFmtRsvnGroup =
+        //        "SELECT Rsvn_Date, SUM(RoomPrice) AS SumRoomPrice, SUM(AbfPrice) AS SumAbfPrice FROM (" +
+        //        "SELECT A.Rsvn_Date, " +
+        //        "IF (A.Rsvn_AbfInc = 1, Rsvn_RoomPrice-(Rsvn_AbfPrice*(B.Rsvn_PaxAdult+B.Rsvn_PaxChild)), Rsvn_RoomPrice) AS RoomPrice, " +
+        //        "Rsvn_AbfPrice*(B.Rsvn_PaxAdult+B.Rsvn_PaxChild) AS AbfPrice " +
+        //        "FROM RsvnGroupDetail A " +
+        //        "JOIN RsvnGroupInfo B ON A.Rsvn_TransID=B.Rsvn_TransID AND A.Rsvn_GroupID=B.Rsvn_GroupID " +
+        //        "JOIN RsvnTransaction C ON A.Rsvn_TransID=C.Rsvn_TransID " +
+        //        "WHERE C.Rsvn_StatusID<10 " +
+        //         "AND A.Rsvn_Date>='" + startdate + "' AND A.Rsvn_Date<'" + enddate + "'" +
+        //        "ORDER BY A.Rsvn_Date) AS A " +
+        //        "GROUP BY Rsvn_Date";
+
+        //    string szFmtTransFIT =
+        //        "SELECT Trans_Date, SUM(RoomPrice) AS SumRoomPrice, SUM(AbfPrice) AS SumAbfPrice FROM (" +
+        //        "SELECT A.Trans_Date, " +
+        //        "IF (A.Trans_AbfInc = 1, Trans_RoomPrice-(Trans_AbfPrice*(B.Trans_PaxAdult+B.Trans_PaxChild)), Trans_RoomPrice) AS RoomPrice, " +
+        //        "Trans_AbfPrice*(B.Trans_PaxAdult+B.Trans_PaxChild) AS AbfPrice " +
+        //        "FROM HotelTransRoomInfo A " +
+        //        "JOIN HotelTransaction B ON A.TransactionID=B.TransactionID " +
+        //        "WHERE B.Trans_StatusID<90 " +
+        //         "AND A.Trans_Date>='" + startdate + "' AND A.Trans_Date<'" + enddate + "'" +
+        //        "ORDER BY A.Trans_Date) AS A " +
+        //        "GROUP BY Trans_Date";
+
+        //    string szFmtTransGroup =
+        //        "SELECT Trans_Date, SUM(RoomPrice) AS SumRoomPrice, SUM(AbfPrice) AS SumAbfPrice FROM (" +
+        //        "SELECT A.Trans_Date, " +
+        //        "IF (A.Trans_AbfInc = 1, Trans_RoomPrice-(Trans_AbfPrice*(B.Trans_PaxAdult+B.Trans_PaxChild)), Trans_RoomPrice) AS RoomPrice, " +
+        //        "Trans_AbfPrice*(B.Trans_PaxAdult+B.Trans_PaxChild) AS AbfPrice " +
+        //        "FROM HotelTransGroupDetail A " +
+        //        "JOIN HotelTransGroupInfo B ON A.TransactionID=B.TransactionID AND A.Trans_GroupID=B.Trans_GroupID " +
+        //        "JOIN HotelTransaction C ON A.TransactionID=C.TransactionID " +
+        //        "WHERE C.Trans_StatusID<90 " +
+        //         "AND A.Trans_Date>='" + startdate + "' AND A.Trans_Date<'" + enddate + "'" +
+        //        "ORDER BY A.Trans_Date) AS A " +
+        //        "GROUP BY Trans_Date ";
+
+        //   DataTable dtRsvnFit = DBHelper.QueryListData(conn, szFmtRsvnFIT);
+
+        //   DataTable dtRsvnGroup = DBHelper.QueryListData(conn, szFmtRsvnGroup);
+
+        //  DataTable dtTransFit = DBHelper.QueryListData(conn, szFmtTransFIT);
+
+        //  DataTable dtTransGroup = DBHelper.QueryListData(conn, szFmtTransGroup);
+
+        //    for (int i = 1; i <= days; i++)
+        //    {
+        //        decimal fTotalRC = 0, fTotalABF = 0;
+        //        DateTime dtDate = new DateTime(year, month, i);
+        //        DataRow[] row = dtRsvnFit.Select("Rsvn_Date=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
+        //        if (row.Length > 0)
+        //        {
+        //            fTotalRC = decimal.Parse(row[0][1].ToString());
+        //            fTotalABF = decimal.Parse(row[0][2].ToString());
+        //        }
+
+        //        row = dtRsvnGroup.Select("Rsvn_Date=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
+        //        if (row.Length > 0)
+        //        {
+        //            fTotalRC += decimal.Parse(row[0][1].ToString());
+        //            fTotalABF += decimal.Parse(row[0][2].ToString());
+        //        }
+
+        //        row = dtTransFit.Select("Trans_Date=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
+        //        if (row.Length > 0)
+        //        {
+        //            fTotalRC += decimal.Parse(row[0][1].ToString());
+        //            fTotalABF += decimal.Parse(row[0][2].ToString());
+        //        }
+
+        //        row = dtTransGroup.Select("Trans_Date=#" + dtDate.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo) + "#");
+        //        if (row.Length > 0)
+        //        {
+        //            fTotalRC += decimal.Parse(row[0][1].ToString());
+        //            fTotalABF += decimal.Parse(row[0][2].ToString());
+        //        }
+
+        //        DataRow dr = dtRes.NewRow();
+        //        dr["Date"] = dtDate;
+        //        dr["TotalRoomCharge"] = fTotalRC;
+        //        dr["TotalABF"] = fTotalABF;
+        //        dtRes.Rows.Add(dr);
+        //    }
+
+        //    return dtRes;
+        //}
         protected static int GetTotalRooms(MySqlConnection conn)
         {
             string szQuery = "SELECT COUNT(*) FROM RoomNo WHERE RoomCategoryID=0 AND Deleted=0 AND Activate=1";

@@ -54,7 +54,7 @@ namespace Webrestful.Controllers
             }
 
             string szErrMsg = "";
-            var xListTransInfo = HistoryandForcast.GetForcasts(conn, Convert.ToDateTime(szDate1), Convert.ToDateTime(szDate2), ref szErrMsg);
+            var xListTransInfo = HistoryandForcast.GetForcasts(conn, Convert.ToDateTime(szDate1), Convert.ToDateTime(szDate2), vat,ref szErrMsg);
             if (xListTransInfo == null)
             {
                 result.status = 1;
