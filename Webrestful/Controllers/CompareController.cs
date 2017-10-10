@@ -67,6 +67,62 @@ namespace Webrestful.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpGet]
+        public HttpResponseMessage GetAgencymonth(string szHotelDB, string szServer, string szDate1, string szDate2, string szDate3, string szDate4, string szDeviceCode)
+        {
+            var result = new Response();
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
+            if (conn == null)
+            {
+                result.status = -1;
+                result.dataResult = "Fail Connect Database";
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, result);
+            }
+
+            string szErrMsg = "";
+            var xListTransInfo = Compare.GetAgencyM(conn, szDate1, szDate2, szDate3, szDate4, ref szErrMsg);
+            if (xListTransInfo == null)
+            {
+                result.status = 1;
+                result.dataResult = szErrMsg;
+            }
+            else
+            {
+                result.status = 0;
+                result.dataResult = xListTransInfo;
+            }
+
+            DBHelper.CloseConnection(conn);
+            return Request.CreateResponse(HttpStatusCode.OK, result);
+        }
+        [HttpGet]
+        public HttpResponseMessage GetAgencyyear(string szHotelDB, string szServer, string szDate1, string szDate2, string szDate3, string szDeviceCode)
+        {
+            var result = new Response();
+            var conn = DBHelper.ConnectDatabase(szHotelDB, szServer);
+            if (conn == null)
+            {
+                result.status = -1;
+                result.dataResult = "Fail Connect Database";
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, result);
+            }
+
+            string szErrMsg = "";
+            var xListTransInfo = Compare.GetAgencyY(conn, szDate1, szDate2, szDate3, ref szErrMsg);
+            if (xListTransInfo == null)
+            {
+                result.status = 1;
+                result.dataResult = szErrMsg;
+            }
+            else
+            {
+                result.status = 0;
+                result.dataResult = xListTransInfo;
+            }
+
+            DBHelper.CloseConnection(conn);
+            return Request.CreateResponse(HttpStatusCode.OK, result);
+        }
+        [HttpGet]
         public HttpResponseMessage GetBusiness(string szHotelDB, string szServer, string szDate1, string szDeviceCode)
         {
             var result = new Response();

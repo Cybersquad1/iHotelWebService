@@ -64,11 +64,14 @@ namespace Webrestful.Models
                 var xAryTransCheckIn = new List<AgencyObject>();
                 string AgencyCharge = "SELECT "+mode+"(FolioDetailDate) AS AtDay, SUM(TotalPrice) AS TotalPrice FROM (SELECT FolioDetailDate, B.Trans_AgencyID, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS TotalPrice FROM HotelFolioDetail A JOIN HotelTransaction B ON A.TransactionID=B.TransactionID WHERE A.FolioStatusID<>99 AND FolioItemID IN (1001,2001) AND B.Trans_AgencyID="+id+" AND A.FolioDetailDate>='"+szDate+"' AND A.FolioDetailDate<'"+szDate2+"' GROUP BY FolioDetailDate, B.Trans_AgencyID UNION ALL SELECT FolioDetailDate, B.Trans_AgencyID, SUM(TotalItemPrice+TotalItemVat+TotalServiceCharge+TotalServiceChargeVat) AS TotalPrice FROM HotelFolioGroupDetail A JOIN HotelTransaction B ON A.TransactionID=B.TransactionID WHERE A.FolioStatusID<>99 AND FolioItemID IN (1001,2001) AND B.Trans_AgencyID="+id+" AND A.FolioDetailDate>='"+szDate+"' AND A.FolioDetailDate<'"+szDate2+"' GROUP BY FolioDetailDate, B.Trans_AgencyID) AS A GROUP BY "+mode+"(FolioDetailDate)";
                 DataTable dtFIT = DBHelper.QueryListData(conn, AgencyCharge);
-
+                int temp;
+                float temp2;
                 for (int i = 0; i < dtFIT.Rows.Count; i++)
                 {
                     var xTrans = new AgencyObject();
-                    xTrans.total = dtFIT.Rows[i]["TotalPrice"].ToString();
+                    temp = int.Parse(dtFIT.Rows[i]["TotalPrice"].ToString().Split('.')[0]);
+                    xTrans.total = temp.ToString();
+                    //xTrans.total = dtFIT.Rows[i]["TotalPrice"].ToString();
                     xTrans.date = dtFIT.Rows[i]["AtDay"].ToString();
                     xAryTransCheckIn.Add(xTrans);
                 }

@@ -211,6 +211,13 @@ namespace Webrestful.Models
         public string id { get; set; }
         public string total { get; set; }
     }
+    public class AgencyCompareM
+    {
+        public string name { get; set; }
+        public string id { get; set; }
+        public string previousSum { get; set; }
+        public string presentSum { get; set; }
+    }
     public class FolioCompare
     {
         public string id { get; set; }

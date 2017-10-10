@@ -11,6 +11,497 @@ namespace Webrestful.Models
 {
     public class Compare
     {
+        public static List<AgencyCompareM> GetAgencyM(MySqlConnection conn, string dtHotelDate1, string dtHotelDate2, string dtHotelDate3, string dtHotelDate4,ref string szErrMsg)
+        {
+            try
+            {
+                var xAryTransCheckIn = new List<AgencyCompareM>();
+                CultureInfo cur = new CultureInfo("en-US");
+                string previousyear = dtHotelDate1;
+                string previousyear2 = dtHotelDate2;
+                string presentyear = dtHotelDate3;
+                string presentyear2 = dtHotelDate4;
+                Debug.WriteLine("Previous year: " + previousyear + "-" + previousyear2 + " Present year: " + presentyear + "-" + presentyear2);
+                string[] oldID; string[] newID; string[] oldSUM; string[] newSUM; string[] MergeID; string[] MergeOldSUM; string[] MergeNewSUM;
+                string[] oldName; string[] newName; string[] MergeName;
+                int oldCount, newCount, superCount, finalCount = 0;
+                ////// Get Previous Year //////
+                string sqlstring = "SELECT Trans_AgencyID, AgencyName, SUM(RoomNight) AS SumRoomNight FROM ( SELECT A.Trans_AgencyID, B.AgencyName, COUNT(Trans_Date) AS RoomNight FROM HotelTransaction A JOIN AgencyInfo B ON A.Trans_AgencyID=B.AgencyID JOIN HotelTransRoomInfo C ON A.TransactionID=C.TransactionID WHERE A.Trans_StatusID<90 AND A.Trans_TypeID=3 AND C.Trans_Date>='"+previousyear+ "' AND C.Trans_Date<'" + previousyear2 + "' GROUP BY A.Trans_AgencyID UNION SELECT A.Trans_AgencyID, B.AgencyName, COUNT(Trans_Date) AS RoomNight FROM HotelTransaction A JOIN AgencyInfo B ON A.Trans_AgencyID=B.AgencyID JOIN HotelTransGroupInfo C ON A.TransactionID=C.TransactionID JOIN HotelTransGroupDetail D ON C.TransactionID=D.TransactionID AND C.Trans_GroupID=D.Trans_GroupID WHERE A.Trans_StatusID<90 AND A.Trans_TypeID=4 AND D.Trans_Date>='" + previousyear + "' AND D.Trans_Date<'" + previousyear2 + "' GROUP BY A.Trans_AgencyID ) AS A GROUP BY Trans_AgencyID ORDER BY SumRoomNight DESC, AgencyName";
+                DataTable dt = DBHelper.QueryListData(conn, sqlstring);
+                oldID = new string[dt.Rows.Count];
+                oldSUM = new string[dt.Rows.Count];
+                oldName = new string[dt.Rows.Count];
+                oldCount = dt.Rows.Count;
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    oldID[i] = dt.Rows[i]["Trans_AgencyID"].ToString();
+                    oldName[i] = dt.Rows[i]["AgencyName"].ToString();
+                }
+                Debug.WriteLine("Finish Get Previous Year");
+                ////// Get Present Year //////
+                string sqlstring2 = "SELECT Trans_AgencyID, AgencyName, SUM(RoomNight) AS SumRoomNight FROM ( SELECT A.Trans_AgencyID, B.AgencyName, COUNT(Trans_Date) AS RoomNight FROM HotelTransaction A JOIN AgencyInfo B ON A.Trans_AgencyID=B.AgencyID JOIN HotelTransRoomInfo C ON A.TransactionID=C.TransactionID WHERE A.Trans_StatusID<90 AND A.Trans_TypeID=3 AND C.Trans_Date>='" + presentyear + "' AND C.Trans_Date<'" + presentyear2 + "' GROUP BY A.Trans_AgencyID UNION SELECT A.Trans_AgencyID, B.AgencyName, COUNT(Trans_Date) AS RoomNight FROM HotelTransaction A JOIN AgencyInfo B ON A.Trans_AgencyID=B.AgencyID JOIN HotelTransGroupInfo C ON A.TransactionID=C.TransactionID JOIN HotelTransGroupDetail D ON C.TransactionID=D.TransactionID AND C.Trans_GroupID=D.Trans_GroupID WHERE A.Trans_StatusID<90 AND A.Trans_TypeID=4 AND D.Trans_Date>='" + presentyear + "' AND D.Trans_Date<'" + presentyear2 + "' GROUP BY A.Trans_AgencyID ) AS A GROUP BY Trans_AgencyID ORDER BY SumRoomNight DESC, AgencyName";
+                DataTable dt2 = DBHelper.QueryListData(conn, sqlstring2);
+                newID = new string[dt2.Rows.Count];
+                newSUM = new string[dt2.Rows.Count];
+                newName = new string[dt2.Rows.Count];
+                newCount = dt2.Rows.Count;
+                for (int i = 0; i < dt2.Rows.Count; i++)
+                {
+                    newID[i] = dt2.Rows[i]["Trans_AgencyID"].ToString();
+                    newName[i] = dt2.Rows[i]["AgencyName"].ToString();
+                }
+                Debug.WriteLine("Finish Get Present Year");
+                ///// Get Transaction ID previous Year //////
+                string[] oldTransactionID = new string [oldCount];
+                for(int i = 0; i < oldCount; i++)
+                {
+                    string sqlTransID = "SELECT A.TransactionID FROM HotelTransaction A JOIN AgencyInfo B ON A.Trans_AgencyID=B.AgencyID JOIN HotelTransRoomInfo C ON A.TransactionID=C.TransactionID WHERE A.Trans_StatusID<90 AND C.Trans_Date>='"+previousyear+ "' AND C.Trans_Date<'" + previousyear2 + "' AND A.Trans_TypeID=3 AND A.Trans_AgencyID="+oldID[i]+ " GROUP BY A.TransactionID UNION SELECT A.TransactionID FROM HotelTransaction A JOIN AgencyInfo B ON A.Trans_AgencyID=B.AgencyID JOIN HotelTransGroupInfo C ON A.TransactionID=C.TransactionID JOIN HotelTransGroupDetail D ON C.TransactionID=D.TransactionID AND C.Trans_GroupID=D.Trans_GroupID WHERE A.Trans_StatusID<90 AND D.Trans_Date>='" + previousyear + "' AND D.Trans_Date<'" + previousyear2 + "' AND A.Trans_TypeID=4 AND A.Trans_AgencyID="+oldID[i]+" GROUP BY A.TransactionID;";
+                    DataTable dtID = DBHelper.QueryListData(conn, sqlTransID);
+                    for (int j = 0;j< dtID.Rows.Count; j++)
+                    {
+                        if (j == 0)
+                        {
+                            oldTransactionID[i] = dtID.Rows[j]["TransactionID"].ToString();
+                        }else
+                        {
+                            oldTransactionID[i] += "," + dtID.Rows[j]["TransactionID"].ToString();
+                        }
+                    }
+                }
+                Debug.WriteLine("Finish Get Transaction ID previous Year");
+                Debug.WriteLine(oldTransactionID[0]);
+
+                ///// Get Transaction ID Present Year //////
+                string[] newTransactionID = new string[newCount];
+                for (int i = 0; i < newCount; i++)
+                {
+                    string sqlTransID2 = "SELECT A.TransactionID FROM HotelTransaction A JOIN AgencyInfo B ON A.Trans_AgencyID=B.AgencyID JOIN HotelTransRoomInfo C ON A.TransactionID=C.TransactionID WHERE A.Trans_StatusID<90 AND C.Trans_Date>='" + presentyear + "' AND C.Trans_Date<'" + presentyear2 + "' AND A.Trans_TypeID=3 AND A.Trans_AgencyID=" + newID[i] + " GROUP BY A.TransactionID UNION SELECT A.TransactionID FROM HotelTransaction A JOIN AgencyInfo B ON A.Trans_AgencyID=B.AgencyID JOIN HotelTransGroupInfo C ON A.TransactionID=C.TransactionID JOIN HotelTransGroupDetail D ON C.TransactionID=D.TransactionID AND C.Trans_GroupID=D.Trans_GroupID WHERE A.Trans_StatusID<90 AND D.Trans_Date>='" + presentyear + "' AND D.Trans_Date<'" + presentyear2 + "' AND A.Trans_TypeID=4 AND A.Trans_AgencyID=" + newID[i] + " GROUP BY A.TransactionID;";
+                    DataTable dtID2 = DBHelper.QueryListData(conn, sqlTransID2);
+                    for (int j = 0; j < dtID2.Rows.Count; j++)
+                    {
+                        if (j == 0)
+                        {
+                            newTransactionID[i] = dtID2.Rows[j]["TransactionID"].ToString();
+                        }
+                        else
+                        {
+                            newTransactionID[i] += "," + dtID2.Rows[j]["TransactionID"].ToString(); 
+                        }
+                    }
+                }
+                Debug.WriteLine("Finish Get Transaction ID present Year");
+                Debug.WriteLine(newTransactionID[0]);
+
+                ////// Get Previous year sum //////
+                for (int i = 0; i < oldCount; i++)
+                {
+                    string sqlSum = " SELECT SUM(SumPrice) AS TotalPrice FROM ( SELECT SUM(TotalItemPrice+TotalItemVat) AS SumPrice FROM HotelFolioDetail A WHERE A.TransactionID IN (" + oldTransactionID[i] + ") AND FolioDetailDate>='" + previousyear + "' AND FolioDetailDate<'" + previousyear2 + "' AND FolioItemID=1001 AND A.FolioStatusID<90 UNION SELECT SUM(TotalItemPrice+TotalItemVat) AS SumPrice FROM HotelFolioGroupDetail A WHERE A.TransactionID IN ("+oldTransactionID[i]+") AND FolioDetailDate>='" + previousyear + "' AND FolioDetailDate<'" + previousyear2 + "' AND FolioItemID=1001 AND A.FolioStatusID<90 ) AS A;";
+                    DataTable dtSum = DBHelper.QueryListData(conn, sqlSum);
+                    oldSUM[i] = dtSum.Rows[0]["TotalPrice"].ToString();
+                }
+                Debug.WriteLine("Finish Get Previous year sum");
+
+                ////// Get Present year sum //////
+                for (int i = 0; i < newCount; i++)
+                {
+                    string sqlSum2 = " SELECT SUM(SumPrice) AS TotalPrice FROM ( SELECT SUM(TotalItemPrice+TotalItemVat) AS SumPrice FROM HotelFolioDetail A WHERE A.TransactionID IN (" + newTransactionID[i] + ") AND FolioDetailDate>='" + presentyear + "' AND FolioDetailDate<'" + presentyear2 + "' AND FolioItemID=1001 AND A.FolioStatusID<90 UNION SELECT SUM(TotalItemPrice+TotalItemVat) AS SumPrice FROM HotelFolioGroupDetail A WHERE A.TransactionID IN (" + newTransactionID[i] + ") AND FolioDetailDate>='" + presentyear + "' AND FolioDetailDate<'" + presentyear2 + "' AND FolioItemID=1001 AND A.FolioStatusID<90 ) AS A;";
+                    DataTable dtSum2 = DBHelper.QueryListData(conn, sqlSum2);
+                    newSUM[i] = dtSum2.Rows[0]["TotalPrice"].ToString();
+                }
+                Debug.WriteLine("Finish Get present year sum");
+                ////// MERGE YEARS //////
+                if (oldCount > newCount)
+                {
+                    superCount = oldCount;
+                    finalCount = superCount;
+                    MergeID = new string[oldCount + newCount];
+                    MergeName = new string[oldCount + newCount];
+                    MergeNewSUM = new string[oldCount + newCount];
+                    MergeOldSUM = new string[oldCount + newCount];
+                } if (newCount > oldCount)
+                {
+                    superCount = newCount;
+                    finalCount = superCount;
+                    MergeID = new string[oldCount + newCount];
+                    MergeName = new string[oldCount + newCount];
+                    MergeNewSUM = new string[oldCount + newCount];
+                    MergeOldSUM = new string[oldCount + newCount];
+                }
+                else
+                {
+                    superCount = newCount;
+                    finalCount = superCount;
+                    MergeID = new string[oldCount + newCount];
+                    MergeName = new string[oldCount + newCount];
+                    MergeNewSUM = new string[oldCount + newCount];
+                    MergeOldSUM = new string[oldCount + newCount];
+                }
+
+                //oldCount > NewCount
+                if (oldCount > newCount)
+                {
+                    for (int i = 0; i < superCount; i++)
+                    {
+                        for (int j = 0; j < newCount; j++)
+                        {
+                            if (oldID[i] == newID[j])
+                            {
+                                MergeID[i] = oldID[i];
+                                MergeName[i] = oldName[i];
+                                MergeOldSUM[i] = oldSUM[i];
+                                MergeNewSUM[i] = newSUM[j];
+                                break;
+                            }
+                            if (j == newCount - 1)
+                            {
+                                MergeID[i] = oldID[i];
+                                MergeName[i] = oldName[i];
+                                MergeOldSUM[i] = oldSUM[i];
+                                MergeNewSUM[i] = "0";
+                            }
+                        }
+                    }
+                }////END oldCount > NewCount
+
+                //newCount > oldCount or newCount == oldCount
+                else
+                {
+                    for (int i = 0; i < superCount; i++)
+                    {
+                        for (int j = 0; j < oldCount; j++)
+                        {
+                            if (newID[i] == oldID[j])
+                            {
+                                MergeID[i] = newID[i];
+                                MergeName[i] = newName[i];
+                                MergeOldSUM[i] = oldSUM[j];
+                                MergeNewSUM[i] = newSUM[i];
+                                break;
+                            }
+                            if (j == oldCount - 1)
+                            {
+                                MergeID[i] = newID[i];
+                                MergeName[i] = newName[i];
+                                MergeOldSUM[i] = "0";
+                                MergeNewSUM[i] = newSUM[i];
+                            }
+                        }
+                    }
+                } //// END newCount > oldCount or newCount == oldCount
+
+                //Recheck
+                if (oldCount > newCount)
+                {
+                    int offset = 0;
+                    for (int i = 0; i < newCount; i++)
+                    {
+                        for (int j = 0; j < oldCount; j++)
+                        {
+                            if (newID[i] == oldID[j])
+                            {
+                                break;
+                            }
+                            if (j == oldCount - 1)
+                            {
+                                MergeID[oldCount + offset] = newID[i];
+                                MergeName[oldCount + offset] = newName[i];
+                                MergeNewSUM[oldCount + offset] = newSUM[i];
+                                MergeOldSUM[oldCount + offset] = "0";
+                                offset++;
+                                finalCount++;
+                            }
+                        }
+                    }
+                }
+
+                //if (newCount > oldCount) and newCount == oldCount
+                else
+                {
+                    int offset = 0;
+                    for (int i = 0; i < oldCount; i++)
+                    {
+                        for (int j = 0; j < newCount; j++)
+                        {
+                            if (oldID[i] == newID[j])
+                            {
+                                break;
+                            }
+                            if (j == newCount - 1)
+                            {
+                                MergeID[newCount + offset] = oldID[i];
+                                MergeName[newCount + offset] = oldName[i];
+                                MergeNewSUM[newCount + offset] = "0";
+                                MergeOldSUM[newCount + offset] = oldSUM[i];
+                                offset++;
+                                finalCount++;
+                            }
+                        }
+                    }
+                }
+
+                for (int i = 0; i < finalCount; i++)
+                {
+                    var xTrans = new AgencyCompareM();
+                    xTrans.id = MergeID[i];
+                    xTrans.name = MergeName[i];
+                    xTrans.previousSum = MergeOldSUM[i];
+                    xTrans.presentSum = MergeNewSUM[i];
+                    xAryTransCheckIn.Add(xTrans);
+                }
+                return xAryTransCheckIn;
+            }
+            catch (Exception err)
+            {
+                szErrMsg = err.Message;
+                return null;
+            }
+        }
+        public static List<AgencyCompareM> GetAgencyY(MySqlConnection conn, string dtHotelDate1, string dtHotelDate2, string dtHotelDate3, ref string szErrMsg)
+        {
+            try
+            {
+                var xAryTransCheckIn = new List<AgencyCompareM>();
+                CultureInfo cur = new CultureInfo("en-US");
+                string previousyear = dtHotelDate1;
+                string presentyear = dtHotelDate2;
+                string nextyear = dtHotelDate3;
+                //Debug.WriteLine("Previous year: " + previousyear + "-" + previousyear2 + " Present year: " + presentyear + "-" + presentyear2);
+                string[] oldID; string[] newID; string[] oldSUM; string[] newSUM; string[] MergeID; string[] MergeOldSUM; string[] MergeNewSUM;
+                string[] oldName; string[] newName; string[] MergeName;
+                int oldCount, newCount, superCount, finalCount = 0;
+                ////// Get Previous Year //////
+                string sqlstring = "SELECT Trans_AgencyID, AgencyName, SUM(RoomNight) AS SumRoomNight FROM ( SELECT A.Trans_AgencyID, B.AgencyName, COUNT(Trans_Date) AS RoomNight FROM HotelTransaction A JOIN AgencyInfo B ON A.Trans_AgencyID=B.AgencyID JOIN HotelTransRoomInfo C ON A.TransactionID=C.TransactionID WHERE A.Trans_StatusID<90 AND A.Trans_TypeID=3 AND C.Trans_Date>='" + previousyear + "' AND C.Trans_Date<'" + presentyear + "' GROUP BY A.Trans_AgencyID UNION SELECT A.Trans_AgencyID, B.AgencyName, COUNT(Trans_Date) AS RoomNight FROM HotelTransaction A JOIN AgencyInfo B ON A.Trans_AgencyID=B.AgencyID JOIN HotelTransGroupInfo C ON A.TransactionID=C.TransactionID JOIN HotelTransGroupDetail D ON C.TransactionID=D.TransactionID AND C.Trans_GroupID=D.Trans_GroupID WHERE A.Trans_StatusID<90 AND A.Trans_TypeID=4 AND D.Trans_Date>='" + previousyear + "' AND D.Trans_Date<'" + presentyear + "' GROUP BY A.Trans_AgencyID ) AS A GROUP BY Trans_AgencyID ORDER BY SumRoomNight DESC, AgencyName";
+                DataTable dt = DBHelper.QueryListData(conn, sqlstring);
+                oldID = new string[dt.Rows.Count];
+                oldSUM = new string[dt.Rows.Count];
+                oldName = new string[dt.Rows.Count];
+                oldCount = dt.Rows.Count;
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    oldID[i] = dt.Rows[i]["Trans_AgencyID"].ToString();
+                    oldName[i] = dt.Rows[i]["AgencyName"].ToString();
+                }
+                Debug.WriteLine("Finish Get Previous Year");
+                ////// Get Present Year //////
+                string sqlstring2 = "SELECT Trans_AgencyID, AgencyName, SUM(RoomNight) AS SumRoomNight FROM ( SELECT A.Trans_AgencyID, B.AgencyName, COUNT(Trans_Date) AS RoomNight FROM HotelTransaction A JOIN AgencyInfo B ON A.Trans_AgencyID=B.AgencyID JOIN HotelTransRoomInfo C ON A.TransactionID=C.TransactionID WHERE A.Trans_StatusID<90 AND A.Trans_TypeID=3 AND C.Trans_Date>='" + presentyear + "' AND C.Trans_Date<'" + nextyear + "' GROUP BY A.Trans_AgencyID UNION SELECT A.Trans_AgencyID, B.AgencyName, COUNT(Trans_Date) AS RoomNight FROM HotelTransaction A JOIN AgencyInfo B ON A.Trans_AgencyID=B.AgencyID JOIN HotelTransGroupInfo C ON A.TransactionID=C.TransactionID JOIN HotelTransGroupDetail D ON C.TransactionID=D.TransactionID AND C.Trans_GroupID=D.Trans_GroupID WHERE A.Trans_StatusID<90 AND A.Trans_TypeID=4 AND D.Trans_Date>='" + presentyear + "' AND D.Trans_Date<'" + nextyear + "' GROUP BY A.Trans_AgencyID ) AS A GROUP BY Trans_AgencyID ORDER BY SumRoomNight DESC, AgencyName";
+                DataTable dt2 = DBHelper.QueryListData(conn, sqlstring2);
+                newID = new string[dt2.Rows.Count];
+                newSUM = new string[dt2.Rows.Count];
+                newName = new string[dt2.Rows.Count];
+                newCount = dt2.Rows.Count;
+                for (int i = 0; i < dt2.Rows.Count; i++)
+                {
+                    newID[i] = dt2.Rows[i]["Trans_AgencyID"].ToString();
+                    newName[i] = dt2.Rows[i]["AgencyName"].ToString();
+                }
+                Debug.WriteLine("Finish Get Present Year");
+                ///// Get Transaction ID previous Year //////
+                string[] oldTransactionID = new string[oldCount];
+                for (int i = 0; i < oldCount; i++)
+                {
+                    string sqlTransID = "SELECT A.TransactionID FROM HotelTransaction A JOIN AgencyInfo B ON A.Trans_AgencyID=B.AgencyID JOIN HotelTransRoomInfo C ON A.TransactionID=C.TransactionID WHERE A.Trans_StatusID<90 AND C.Trans_Date>='" + previousyear + "' AND C.Trans_Date<'" + presentyear + "' AND A.Trans_TypeID=3 AND A.Trans_AgencyID=" + oldID[i] + " GROUP BY A.TransactionID UNION SELECT A.TransactionID FROM HotelTransaction A JOIN AgencyInfo B ON A.Trans_AgencyID=B.AgencyID JOIN HotelTransGroupInfo C ON A.TransactionID=C.TransactionID JOIN HotelTransGroupDetail D ON C.TransactionID=D.TransactionID AND C.Trans_GroupID=D.Trans_GroupID WHERE A.Trans_StatusID<90 AND D.Trans_Date>='" + previousyear + "' AND D.Trans_Date<'" + presentyear + "' AND A.Trans_TypeID=4 AND A.Trans_AgencyID=" + oldID[i] + " GROUP BY A.TransactionID;";
+                    DataTable dtID = DBHelper.QueryListData(conn, sqlTransID);
+                    for (int j = 0; j < dtID.Rows.Count; j++)
+                    {
+                        if (j == 0)
+                        {
+                            oldTransactionID[i] = dtID.Rows[j]["TransactionID"].ToString();
+                        }
+                        else
+                        {
+                            oldTransactionID[i] += "," + dtID.Rows[j]["TransactionID"].ToString();
+                        }
+                    }
+                }
+                Debug.WriteLine("Finish Get Transaction ID previous Year");
+                Debug.WriteLine(oldTransactionID[0]);
+
+                ///// Get Transaction ID Present Year //////
+                string[] newTransactionID = new string[newCount];
+                for (int i = 0; i < newCount; i++)
+                {
+                    string sqlTransID2 = "SELECT A.TransactionID FROM HotelTransaction A JOIN AgencyInfo B ON A.Trans_AgencyID=B.AgencyID JOIN HotelTransRoomInfo C ON A.TransactionID=C.TransactionID WHERE A.Trans_StatusID<90 AND C.Trans_Date>='" + presentyear + "' AND C.Trans_Date<'" + nextyear + "' AND A.Trans_TypeID=3 AND A.Trans_AgencyID=" + newID[i] + " GROUP BY A.TransactionID UNION SELECT A.TransactionID FROM HotelTransaction A JOIN AgencyInfo B ON A.Trans_AgencyID=B.AgencyID JOIN HotelTransGroupInfo C ON A.TransactionID=C.TransactionID JOIN HotelTransGroupDetail D ON C.TransactionID=D.TransactionID AND C.Trans_GroupID=D.Trans_GroupID WHERE A.Trans_StatusID<90 AND D.Trans_Date>='" + presentyear + "' AND D.Trans_Date<'" + nextyear + "' AND A.Trans_TypeID=4 AND A.Trans_AgencyID=" + newID[i] + " GROUP BY A.TransactionID;";
+                    DataTable dtID2 = DBHelper.QueryListData(conn, sqlTransID2);
+                    for (int j = 0; j < dtID2.Rows.Count; j++)
+                    {
+                        if (j == 0)
+                        {
+                            newTransactionID[i] = dtID2.Rows[j]["TransactionID"].ToString();
+                        }
+                        else
+                        {
+                            newTransactionID[i] += "," + dtID2.Rows[j]["TransactionID"].ToString();
+                        }
+                    }
+                }
+                Debug.WriteLine("Finish Get Transaction ID present Year");
+                Debug.WriteLine(newTransactionID[0]);
+
+                ////// Get Previous year sum //////
+                for (int i = 0; i < oldCount; i++)
+                {
+                    string sqlSum = " SELECT SUM(SumPrice) AS TotalPrice FROM ( SELECT SUM(TotalItemPrice+TotalItemVat) AS SumPrice FROM HotelFolioDetail A WHERE A.TransactionID IN (" + oldTransactionID[i] + ") AND FolioDetailDate>='" + previousyear + "' AND FolioDetailDate<'" + presentyear + "' AND FolioItemID=1001 AND A.FolioStatusID<90 UNION SELECT SUM(TotalItemPrice+TotalItemVat) AS SumPrice FROM HotelFolioGroupDetail A WHERE A.TransactionID IN (" + oldTransactionID[i] + ") AND FolioDetailDate>='" + previousyear + "' AND FolioDetailDate<'" + presentyear + "' AND FolioItemID=1001 AND A.FolioStatusID<90 ) AS A;";
+                    DataTable dtSum = DBHelper.QueryListData(conn, sqlSum);
+                    oldSUM[i] = dtSum.Rows[0]["TotalPrice"].ToString();
+                }
+                Debug.WriteLine("Finish Get Previous year sum");
+
+                ////// Get Present year sum //////
+                for (int i = 0; i < newCount; i++)
+                {
+                    string sqlSum2 = " SELECT SUM(SumPrice) AS TotalPrice FROM ( SELECT SUM(TotalItemPrice+TotalItemVat) AS SumPrice FROM HotelFolioDetail A WHERE A.TransactionID IN (" + newTransactionID[i] + ") AND FolioDetailDate>='" + presentyear + "' AND FolioDetailDate<'" + nextyear + "' AND FolioItemID=1001 AND A.FolioStatusID<90 UNION SELECT SUM(TotalItemPrice+TotalItemVat) AS SumPrice FROM HotelFolioGroupDetail A WHERE A.TransactionID IN (" + newTransactionID[i] + ") AND FolioDetailDate>='" + presentyear + "' AND FolioDetailDate<'" + nextyear + "' AND FolioItemID=1001 AND A.FolioStatusID<90 ) AS A;";
+                    DataTable dtSum2 = DBHelper.QueryListData(conn, sqlSum2);
+                    newSUM[i] = dtSum2.Rows[0]["TotalPrice"].ToString();
+                }
+                Debug.WriteLine("Finish Get present year sum");
+                ////// MERGE YEARS //////
+                if (oldCount > newCount)
+                {
+                    superCount = oldCount;
+                    finalCount = superCount;
+                    MergeID = new string[oldCount + newCount];
+                    MergeName = new string[oldCount + newCount];
+                    MergeNewSUM = new string[oldCount + newCount];
+                    MergeOldSUM = new string[oldCount + newCount];
+                }
+                if (newCount > oldCount)
+                {
+                    superCount = newCount;
+                    finalCount = superCount;
+                    MergeID = new string[oldCount + newCount];
+                    MergeName = new string[oldCount + newCount];
+                    MergeNewSUM = new string[oldCount + newCount];
+                    MergeOldSUM = new string[oldCount + newCount];
+                }
+                else
+                {
+                    superCount = newCount;
+                    finalCount = superCount;
+                    MergeID = new string[oldCount + newCount];
+                    MergeName = new string[oldCount + newCount];
+                    MergeNewSUM = new string[oldCount + newCount];
+                    MergeOldSUM = new string[oldCount + newCount];
+                }
+
+                //oldCount > NewCount
+                if (oldCount > newCount)
+                {
+                    for (int i = 0; i < superCount; i++)
+                    {
+                        for (int j = 0; j < newCount; j++)
+                        {
+                            if (oldID[i] == newID[j])
+                            {
+                                MergeID[i] = oldID[i];
+                                MergeName[i] = oldName[i];
+                                MergeOldSUM[i] = oldSUM[i];
+                                MergeNewSUM[i] = newSUM[j];
+                                break;
+                            }
+                            if (j == newCount - 1)
+                            {
+                                MergeID[i] = oldID[i];
+                                MergeName[i] = oldName[i];
+                                MergeOldSUM[i] = oldSUM[i];
+                                MergeNewSUM[i] = "0";
+                            }
+                        }
+                    }
+                }////END oldCount > NewCount
+
+                //newCount > oldCount or newCount == oldCount
+                else
+                {
+                    for (int i = 0; i < superCount; i++)
+                    {
+                        for (int j = 0; j < oldCount; j++)
+                        {
+                            if (newID[i] == oldID[j])
+                            {
+                                MergeID[i] = newID[i];
+                                MergeName[i] = newName[i];
+                                MergeOldSUM[i] = oldSUM[j];
+                                MergeNewSUM[i] = newSUM[i];
+                                break;
+                            }
+                            if (j == oldCount - 1)
+                            {
+                                MergeID[i] = newID[i];
+                                MergeName[i] = newName[i];
+                                MergeOldSUM[i] = "0";
+                                MergeNewSUM[i] = newSUM[i];
+                            }
+                        }
+                    }
+                } //// END newCount > oldCount or newCount == oldCount
+
+                //Recheck
+                if (oldCount > newCount)
+                {
+                    int offset = 0;
+                    for (int i = 0; i < newCount; i++)
+                    {
+                        for (int j = 0; j < oldCount; j++)
+                        {
+                            if (newID[i] == oldID[j])
+                            {
+                                break;
+                            }
+                            if (j == oldCount - 1)
+                            {
+                                MergeID[oldCount + offset] = newID[i];
+                                MergeName[oldCount + offset] = newName[i];
+                                MergeNewSUM[oldCount + offset] = newSUM[i];
+                                MergeOldSUM[oldCount + offset] = "0";
+                                offset++;
+                                finalCount++;
+                            }
+                        }
+                    }
+                }
+
+                //if (newCount > oldCount) and newCount == oldCount
+                else
+                {
+                    int offset = 0;
+                    for (int i = 0; i < oldCount; i++)
+                    {
+                        for (int j = 0; j < newCount; j++)
+                        {
+                            if (oldID[i] == newID[j])
+                            {
+                                break;
+                            }
+                            if (j == newCount - 1)
+                            {
+                                MergeID[newCount + offset] = oldID[i];
+                                MergeName[newCount + offset] = oldName[i];
+                                MergeNewSUM[newCount + offset] = "0";
+                                MergeOldSUM[newCount + offset] = oldSUM[i];
+                                offset++;
+                                finalCount++;
+                            }
+                        }
+                    }
+                }
+
+                for (int i = 0; i < finalCount; i++)
+                {
+                    var xTrans = new AgencyCompareM();
+                    xTrans.id = MergeID[i];
+                    xTrans.name = MergeName[i];
+                    xTrans.previousSum = MergeOldSUM[i];
+                    xTrans.presentSum = MergeNewSUM[i];
+                    xAryTransCheckIn.Add(xTrans);
+                }
+                return xAryTransCheckIn;
+            }
+            catch (Exception err)
+            {
+                szErrMsg = err.Message;
+                return null;
+            }
+        }
         public static List<AgencyCompare> GetAgency(MySqlConnection conn, string mode, string szDate, string szDate2, ref string szErrMsg)
         {
             try
@@ -520,7 +1011,7 @@ namespace Webrestful.Models
                     var xTrans = new CompareBusiness();
                     xTrans.SourceID = id[i];
                     xTrans.BusinessSource = source[i];
-                    xTrans.sum = total[i].ToString("0.");
+                    xTrans.sum = total[i].ToString("N2");
                     GovernmentList.Add(xTrans);
                 }
                     return GovernmentList;
