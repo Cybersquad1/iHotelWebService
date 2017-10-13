@@ -14,6 +14,7 @@ namespace Webrestful.Models
         public string Roomchg { get; set; }
         public string Avg { get; set; }
         public string Pax { get; set; }
+        public string RawOcc { get; set; }
     }
     public class Setstaticroom
     {

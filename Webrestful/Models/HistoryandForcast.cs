@@ -63,6 +63,7 @@ namespace Webrestful.Models
                     xTrans.ABF = Convert.ToString(fTotalAbf.ToString("N"));
                     xTrans.Avg = Convert.ToString(fAvgRate.ToString("N"));
                     xTrans.PerOcc = Convert.ToString(fOccPercent2.ToString("0.##")+"%");
+                    xTrans.RawOcc = Convert.ToString(fOccPercent2.ToString());
                     xTrans.Roomchg = Convert.ToString(fTotalRoomCharge.ToString("N"));
                     xAryTransCheckIn.Add(xTrans);
                 }
@@ -130,6 +131,7 @@ namespace Webrestful.Models
                     xTrans.ABF = Convert.ToString(fTotalAbf.ToString("N"));
                     xTrans.Avg = Convert.ToString(fAvgRate.ToString("N"));
                     xTrans.PerOcc = Convert.ToString(fOccPercent2.ToString("0.##") + "%");
+                    xTrans.RawOcc = Convert.ToString(fOccPercent2.ToString());
                     xTrans.Roomchg = Convert.ToString(fTotalRoomCharge.ToString("N"));
                     xAryTransCheckIn.Add(xTrans);
                 }
