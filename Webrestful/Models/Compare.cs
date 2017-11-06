@@ -976,14 +976,14 @@ namespace Webrestful.Models
         {
             string[] id;
             string[] source;
-            float[] total;
+            double[] total;
             try
             {
                 string BusinessType = "SELECT GuestChannelID, GuestChannelName FROM GuestChannel ORDER BY Ordering;";
                 DataTable dtFIT = DBHelper.QueryListData(conn, BusinessType);
                 id = new string[dtFIT.Rows.Count];
                 source = new string[dtFIT.Rows.Count];
-                total = new float[dtFIT.Rows.Count];
+                total = new double[dtFIT.Rows.Count];
                 for (int i = 0; i < dtFIT.Rows.Count; i++)
                 {
                     source[i] = dtFIT.Rows[i]["GuestChannelName"].ToString();
@@ -1001,7 +1001,7 @@ namespace Webrestful.Models
                     string SQL = "SELECT SUM(TotalPrice) as Totalprice FROM ( SELECT MONTH(A.Trans_Date) AS AtMonth, B.GuestChannelID, SUM(A.Trans_RoomPrice + IF(Trans_AbfInc=0, Trans_AbfPrice,0)+Trans_ExtraBedPrice+IF(Trans_ExtraBedAbf=0, 0, (IF(Trans_AbfInc=0, Trans_AbfPrice,0)))) AS TotalPrice FROM HotelTransRoomInfo A JOIN HotelTransaction B ON A.TransactionID=B.TransactionID WHERE B.Trans_TypeID<>10 AND B.GuestChannelID=" + id[i] + " AND YEAR(A.Trans_Date)='" + selectYear + "' UNION ALL SELECT MONTH(A.Trans_Date) AS AtMonth, C.GuestChannelID, SUM(A.Trans_RoomPrice + IF(Trans_AbfInc=0, Trans_AbfPrice,0)+Trans_ExtraBedPrice+IF(Trans_ExtraBedAbf=0, 0, (IF(Trans_AbfInc=0, Trans_AbfPrice,0)))) AS TotalPrice FROM HotelTransGroupDetail A JOIN HotelTransGroupInfo B ON A.TransactionID=B.TransactionID AND A.Trans_GroupID=B.Trans_GroupID JOIN HotelTransaction C ON B.TransactionID=C.TransactionID WHERE C.GuestChannelID=" + id[i] + " AND YEAR(A.Trans_Date)='" + selectYear + "' UNION ALL SELECT MONTH(A.Rsvn_Date) AS AtMonth, B.GuestChannelID, SUM(A.Rsvn_RoomPrice + IF(Rsvn_AbfInc=0, Rsvn_AbfPrice,0)+Rsvn_ExtraBedPrice+IF(Rsvn_ExtraBedAbf=0, 0, (IF(Rsvn_AbfInc=0, Rsvn_AbfPrice,0)))) AS TotalPrice FROM RsvnRoomInfo A JOIN RsvnTransaction B ON A.Rsvn_TransID=B.Rsvn_TransID WHERE YEAR(A.Rsvn_Date)='" + selectYear + "' AND B.GuestChannelID=" + id[i] + " AND B.Rsvn_StatusID IN (1,2) AND B.Rsvn_ArrivalDate>='" + selectYear + "' UNION ALL SELECT MONTH(A.Rsvn_Date) AS AtMonth, C.GuestChannelID, SUM(A.Rsvn_RoomPrice + IF(Rsvn_AbfInc=0, Rsvn_AbfPrice,0)+Rsvn_ExtraBedPrice+IF(Rsvn_ExtraBedAbf=0, 0, (IF(Rsvn_AbfInc=0, Rsvn_AbfPrice,0)))) AS TotalPrice FROM RsvnGroupDetail A JOIN RsvnGroupInfo B ON A.Rsvn_TransID=B.Rsvn_TransID AND A.Rsvn_GroupID=B.Rsvn_GroupID JOIN RsvnTransaction C ON B.Rsvn_TransID=C.Rsvn_TransID WHERE C.GuestChannelID=" + id[i] + " AND YEAR(A.Rsvn_Date)='" + selectYear + "' AND C.Rsvn_StatusID IN (1,2) AND B.Rsvn_ArrivalDate>='" + selectYear + "' ) AS A";
                     DataTable dtFIT2 = DBHelper.QueryListData(conn, SQL);
                     if (dtFIT2.Rows[0]["Totalprice"].ToString() != "")
-                        total[i] = float.Parse(dtFIT2.Rows[0]["Totalprice"].ToString());
+                        total[i] = double.Parse(dtFIT2.Rows[0]["Totalprice"].ToString());
                     else
                         total[i] = 0;
                     Debug.WriteLine(total[i]);
