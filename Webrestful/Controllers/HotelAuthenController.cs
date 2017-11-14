@@ -106,7 +106,7 @@ namespace Webrestful.Controllers
             //--- Check UserName & Password and permission
             DateTime dtHotelDate = HotelAuthenAPI.GetCurrentHotelDate(conn);
             result.status = 0;
-            result.dataResult = dtHotelDate.ToString("yyyy-MM-dd");
+            result.dataResult = dtHotelDate.ToString("yyyy/MM/dd");
 
             DBHelper.CloseConnection(conn);
             return Request.CreateResponse(HttpStatusCode.OK, result);
